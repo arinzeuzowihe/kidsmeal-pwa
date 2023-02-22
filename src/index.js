@@ -4,18 +4,50 @@ import './index.css';
 import App from './App';
 import * as serviceWorkerRegistration from './serviceWorkerRegistration';
 import reportWebVitals from './reportWebVitals';
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import Home from './components/Home';
+import MealQuestionaire from './components/MealQuestionaire';
+import MealManagement from './components/MealManagement';
+import LoginForm from './components/LoginForm';
+
+//https://reactrouter.com/en/main/start/tutorial
+const broswerRouter = createBrowserRouter([
+  {
+    path: "/",
+    element: <App />,
+    children: [
+      {
+        index: true,
+        element: <Home />
+      },
+      {
+        path: "/nextmeal",
+        element: <MealQuestionaire />
+      },
+      {
+        path: "/meals",
+        element: <MealManagement />
+      },
+      {
+        path: "/logout",
+        element: <LoginForm />
+      }
+    ]
+  }
+]);
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <App />
+    <RouterProvider router={broswerRouter} />
   </React.StrictMode>
 );
+
 
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.
 // Learn more about service workers: https://cra.link/PWA
-serviceWorkerRegistration.unregister();
+serviceWorkerRegistration.register();
 
 // If you want to start measuring performance in your app, pass a function
 // to log results (for example: reportWebVitals(console.log))
