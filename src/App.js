@@ -12,7 +12,7 @@ function App(props) {
   const updateLoginStatus = (isLoggedIn, userInfo) => {
     setUsername(userInfo?.username ?? '');
     setisUserLoggedIn(isLoggedIn);
-  }
+  };
 
   return (      
     <div className="uk-height-viewport">

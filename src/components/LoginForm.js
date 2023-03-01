@@ -9,12 +9,12 @@ function LoginForm({ onLoginCompleted }) {
     const [isLoading, setIsLoading] = useState(false);
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const authService = AuthService.getInstance();
 
     const handleLoginAsync = async () => {
         setIsLoading(true);
 
         //Make API call
-        var authService = AuthService.getInstance();
         const response = await authService.loginAsync({ username, password });
 
         const userInfo = response.wasSuccessful ? { userId: response.userID, username } : undefined;

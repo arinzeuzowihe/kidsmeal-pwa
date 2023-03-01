@@ -1,3 +1,5 @@
+import { BaseKid } from "../interfaces/api/responses";
+
 const apiBaseUrl = "https://localhost:7136"
 
 class BaseService{
@@ -25,10 +27,19 @@ class BaseService{
     protected get currentUserID(): number {
         const userinfo = localStorage.getItem('user_info');
         if (!userinfo)
-            throw new Error('Unable to retriev user info.');
+            throw new Error('Unable to retrieve user info.');
 
         const parsedUserInfo = JSON.parse(userinfo);
         return parsedUserInfo?.userID;
+    }
+
+    protected get currentKidIDs(): number[] {
+        const kids = localStorage.getItem('kids');
+        if (!kids)
+            throw new Error('Unable to retrieve any kid details.');
+
+        const parsedKids = JSON.parse(kids);
+        return parsedKids.map((kid:BaseKid) => { return kid.id})
     }
 
     async getAsync(urlFragment: string, requiresAuthorization: boolean = true) {

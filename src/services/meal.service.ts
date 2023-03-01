@@ -1,3 +1,4 @@
+import { PendingSuggestion } from "../interfaces/api/responses";
 import BaseService from "./base.service";
 
 class MealService extends BaseService {
@@ -19,6 +20,11 @@ class MealService extends BaseService {
 
     getMealHistory(kidID: number) {
         
+    }
+
+    public async getPendingMealSuggestionsAsync(): Promise<PendingSuggestion[]> {     
+        const response = await this.postAsync('/meal/suggestion/pending', this.currentKidIDs);
+        return response.pendingSuggestions as PendingSuggestion[];
     }
 
     getMealSuggestion(request: MealSuggestionRequest) {

@@ -42,6 +42,7 @@ class AuthService extends BaseService {
                 localStorage.setItem('user_info', JSON.stringify({userID , username: request.username}));
                 localStorage.setItem('access_token', response.accessToken);
                 localStorage.setItem('refresh_token', response.refreshToken);
+                localStorage.setItem('kids', JSON.stringify(response.kids));
             }            
         } catch (error) {
             console.error(`Error: ${error}`);
@@ -63,7 +64,8 @@ class AuthService extends BaseService {
                 //remove access token and refresh token from local storage
                 localStorage.removeItem('user_info');
                 localStorage.removeItem('access_token');
-                localStorage.removeItem('refresh_token');   
+                localStorage.removeItem('refresh_token'); 
+                localStorage.removeItem('kids');
             }    
 
         } catch (error) {
