@@ -8,6 +8,8 @@ import { groupBy } from "../interfaces/common/helper.functions";
 
 interface MealHistoryListProps {
     kidID: number;
+
+    refreshData?: boolean;
 }
 
 function MealHistoryList(props: MealHistoryListProps) {
@@ -33,7 +35,7 @@ function MealHistoryList(props: MealHistoryListProps) {
         fetchMealHistory()
             .catch(errorMessage => console.error(errorMessage));
 
-    }, []);
+    }, [props.refreshData]);
 
     if (isLoading) {
         return <Spinner ratio="5" text="Loading...."/>

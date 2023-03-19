@@ -14,6 +14,7 @@ function Home(props: any) {
     const [kids, setKids] = useState<BaseKid[]>([]);
     const mealService = MealService.getInstance();
     const userService = UserService.getInstance();
+    const [selectedKidId, setSelectedKidId] = useState<number>(0);
 
     useEffect(() => {
 
@@ -23,7 +24,7 @@ function Home(props: any) {
             setPendingSuggestions(results);
             setHasPendingSuggestions(pendingSuggestions && pendingSuggestions.length > 0);
             if (!hasPendingSuggestions) {
-                setKids(userService.getKids());
+                setKids(() => userService.getKids());
             }
             setIsLoading(false);
         };
@@ -48,12 +49,12 @@ function Home(props: any) {
                     {
                         kids.map((kid, index) => {
                             if (index == 0) {
-                                return <li key={index} className="uk-width-medium uk-active"><a href="./"><img className="uk-border-circle" src="https://styles.redditmedia.com/t5_2sws5/styles/communityIcon_shz4ogqfbtw81.png" width="50" height="50" alt="" />{kid.name }</a></li>
+                                return <li key={index} onClick={() => setSelectedKidId(kid.id)} className="uk-width-medium uk-active"><a href="./"><img className="uk-border-circle" src="https://styles.redditmedia.com/t5_2sws5/styles/communityIcon_shz4ogqfbtw81.png" width="50" height="50" alt="" />{kid.name }</a></li>
                             }
                             else {
-                                return <li key={index} className="uk-width-medium" ><a href="./"><img className="uk-border-circle" src="https://styles.redditmedia.com/t5_2sws5/styles/communityIcon_shz4ogqfbtw81.png" width="50" height="50" alt="" />{kid.name }</a></li>
+                                return <li key={index} onClick={() => setSelectedKidId(kid.id)} className="uk-width-medium" ><a href="./"><img className="uk-border-circle" src="https://styles.redditmedia.com/t5_2sws5/styles/communityIcon_shz4ogqfbtw81.png" width="50" height="50" alt="" />{kid.name }</a></li>
                             }
-                            
+
                         })
                     }
                 </ul>
@@ -62,7 +63,7 @@ function Home(props: any) {
                 {
                     kids.map((kid, index) => (
                     <li key={index}>
-                        <MealHistoryList kidID={kid.id}/>
+                        <MealHistoryList kidID={kid.id} refreshData={ selectedKidId === kid.id } />
                     </li>
                     ))
                 }
@@ -71,4 +72,5 @@ function Home(props: any) {
     );
 }
 
+// <KidsTab kids={kids} tabContentId="#home-tab-content" onTabClick={(kidId) => setSelectedKidId(kidId)}/>
 export default Home;
