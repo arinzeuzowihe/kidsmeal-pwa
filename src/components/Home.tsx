@@ -3,13 +3,17 @@ import MealHistoryList from "./MealHistoryList";
 import './Home.css'
 import MealService from "../services/meal.service";
 import MealSuggestionList from "./MealSuggestionList";
-import { PendingSuggestion } from "../interfaces/api/responses";
+import { BaseKid, PendingSuggestion } from "../interfaces/api/responses";
 import Spinner from "./Spinner";
+import UserService from "../services/user.service";
 
 function Home(props: any) {
     const [isLoading, setIsLoading] = useState(false);
     const [pendingSuggestions, setPendingSuggestions] = useState<PendingSuggestion[]>([]);
+    const [hasPendingSuggestions, setHasPendingSuggestions] = useState<boolean>(false);
+    const [kids, setKids] = useState<BaseKid[]>([]);
     const mealService = MealService.getInstance();
+    const userService = UserService.getInstance();
 
     useEffect(() => {
 
@@ -17,6 +21,10 @@ function Home(props: any) {
             setIsLoading(true);
             const results = await mealService.getPendingMealSuggestionsAsync();
             setPendingSuggestions(results);
+            setHasPendingSuggestions(pendingSuggestions && pendingSuggestions.length > 0);
+            if (!hasPendingSuggestions) {
+                setKids(userService.getKids());
+            }
             setIsLoading(false);
         };
 
@@ -28,31 +36,39 @@ function Home(props: any) {
     if (isLoading) {
         return <Spinner ratio="5" text="Loading...."/>
     }
-    else {
-        if (pendingSuggestions && pendingSuggestions.length > 0) {
-            return <MealSuggestionList suggestions={pendingSuggestions} displayOnly={false}/>
-        }
-        else {
-            return (
-                <div className="overflow-content" id="home-container">
-                    <div className="uk-margin-small-top" uk-sticky="end: #home-container; offset: 80">
-                        <ul className="uk-flex-center" uk-tab="connect: #home-tab-content; animation: uk-animation-slide-left-medium uk-animation-slide-right-medium">
-                            <li className="uk-width-medium uk-active"><a href="./"><img className="uk-border-circle" src="https://styles.redditmedia.com/t5_2sws5/styles/communityIcon_shz4ogqfbtw81.png" width="50" height="50" alt="" />Son</a></li>
-                            <li className="uk-width-medium" ><a href="./"><img className="uk-border-circle" src="https://styles.redditmedia.com/t5_2sws5/styles/communityIcon_shz4ogqfbtw81.png" width="50" height="50" alt="" />Daughter</a></li>
-                        </ul>
-                    </div>
-                    <ul id="home-tab-content" className="uk-switcher uk-margin">
-                        <li>
-                            <MealHistoryList/>
-                        </li>
-                        <li>
-                            <MealHistoryList/>
-                        </li>
-                    </ul>
-                </div>
-            );
-        }
+    
+    if (hasPendingSuggestions) {
+        return <MealSuggestionList suggestions={pendingSuggestions} displayOnly={false}/>
     }
+    
+    return (
+        <div className="overflow-content" id="home-container">
+            <div className="uk-margin-small-top" uk-sticky="end: #home-container; offset: 80">
+                <ul className="uk-flex-center" uk-tab="connect: #home-tab-content; animation: uk-animation-slide-left-medium uk-animation-slide-right-medium">
+                    {
+                        kids.map((kid, index) => {
+                            if (index == 0) {
+                                return <li key={index} className="uk-width-medium uk-active"><a href="./"><img className="uk-border-circle" src="https://styles.redditmedia.com/t5_2sws5/styles/communityIcon_shz4ogqfbtw81.png" width="50" height="50" alt="" />{kid.name }</a></li>
+                            }
+                            else {
+                                return <li key={index} className="uk-width-medium" ><a href="./"><img className="uk-border-circle" src="https://styles.redditmedia.com/t5_2sws5/styles/communityIcon_shz4ogqfbtw81.png" width="50" height="50" alt="" />{kid.name }</a></li>
+                            }
+                            
+                        })
+                    }
+                </ul>
+            </div>
+            <ul id="home-tab-content" className="uk-switcher uk-margin">
+                {
+                    kids.map((kid, index) => (
+                    <li key={index}>
+                        <MealHistoryList kidID={kid.id}/>
+                    </li>
+                    ))
+                }
+            </ul>
+        </div>
+    );
 }
 
 export default Home;

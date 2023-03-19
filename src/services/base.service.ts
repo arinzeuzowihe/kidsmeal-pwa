@@ -33,28 +33,28 @@ class BaseService{
         return parsedUserInfo?.userID;
     }
 
-    protected get currentKidIDs(): number[] {
+    protected get currentKids(): BaseKid[] {
         const kids = localStorage.getItem('kids');
         if (!kids)
             throw new Error('Unable to retrieve any kid details.');
-
-        const parsedKids = JSON.parse(kids);
-        return parsedKids.map((kid:BaseKid) => { return kid.id})
+        
+        const parsedKids: BaseKid[] = JSON.parse(kids);
+        return parsedKids;
     }
 
-    async getAsync(urlFragment: string, requiresAuthorization: boolean = true) {
+    protected async getAsync(urlFragment: string, requiresAuthorization: boolean = true) {
         return await this.fetchAsync(urlFragment, "GET", requiresAuthorization);
     }
 
-    async postAsync(urlFragment: string, data: any, requiresAuthorization: boolean = true) {
+    protected async postAsync(urlFragment: string, data: any, requiresAuthorization: boolean = true) {
         return await this.fetchAsync(urlFragment, "POST", requiresAuthorization, data);
     }
 
-    async deleteAsync(urlFragment: string, requiresAuthorization: boolean = true) {
+    protected async deleteAsync(urlFragment: string, requiresAuthorization: boolean = true) {
         return await this.fetchAsync(urlFragment, "DELETE", requiresAuthorization);
     }
 
-    async putAsync(urlFragment: string, data: any, requiresAuthorization: boolean = true) {
+    protected async putAsync(urlFragment: string, data: any, requiresAuthorization: boolean = true) {
         return await this.fetchAsync(urlFragment, "PUT", requiresAuthorization, data);
     }
 
@@ -99,6 +99,10 @@ class BaseService{
 
                 //retry the calling method
                 return await this.fetchAsync(urlFragment, method, requiresAuthorization, data, true);
+            }
+
+            if (response.status === 204) {
+                return undefined;
             }
     
             return response.json(); 

@@ -1,3 +1,5 @@
+import { LoginRequest } from "../interfaces/api/requests";
+import { LoginResponse } from "../interfaces/api/responses";
 import BaseService  from "./base.service"
 
 class AuthService extends BaseService {
@@ -21,7 +23,7 @@ class AuthService extends BaseService {
      * @param request 
      * @returns 
      */
-    async loginAsync(request: LoginRequest): Promise<LoginResponse> {
+    public async loginAsync(request: LoginRequest): Promise<LoginResponse> {
         
         if (!request?.username || !request?.password) {
             console.error("Unable to attempt login");
@@ -54,7 +56,7 @@ class AuthService extends BaseService {
     /**
      * Performs a logout request
      */
-    async logoutAsync() {
+    public async logoutAsync() {
         
         try {
             const response = await this.getAsync(`/logout/${this.currentUserID}`)
@@ -75,19 +77,3 @@ class AuthService extends BaseService {
 }
 
 export default AuthService;
-
-type Kid = {
-    kidID: number,
-    name: string
-}
-
-type LoginRequest = {
-    username: string,
-    password: string
-}
-
-type LoginResponse = {
-    userID: number,
-    wasSuccessful: boolean,
-    kids: Kid[]
-}
