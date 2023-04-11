@@ -25,6 +25,21 @@ export interface LoginResponse {
     kids: Kid[]
 }
 
+export interface BasicMealPreference {
+    mealId: number;
+    mealName: string;
+    isActive: boolean;
+}
+
+export interface DetailedMealPreference {
+    mealId: number;
+    mealName: string;
+    mealDescription: string;
+    mealTypes: number[];
+    isSide: boolean;
+    isTakeout: boolean;
+}
+
 // TODO: Replace Kid type with BaseKid contract
 type Kid = {
     kidID: number,

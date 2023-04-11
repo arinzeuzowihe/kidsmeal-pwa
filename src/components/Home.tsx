@@ -48,7 +48,7 @@ function Home(props: any) {
                 <ul className="uk-flex-center" uk-tab="connect: #home-tab-content; animation: uk-animation-slide-left-medium uk-animation-slide-right-medium">
                     {
                         kids.map((kid, index) => {
-                            if (index == 0) {
+                            if (index === 0) {
                                 return <li key={index} onClick={() => setSelectedKidId(kid.id)} className="uk-width-medium uk-active"><a href="./"><img className="uk-border-circle" src="https://styles.redditmedia.com/t5_2sws5/styles/communityIcon_shz4ogqfbtw81.png" width="50" height="50" alt="" />{kid.name }</a></li>
                             }
                             else {
@@ -72,5 +72,4 @@ function Home(props: any) {
     );
 }
 
-// <KidsTab kids={kids} tabContentId="#home-tab-content" onTabClick={(kidId) => setSelectedKidId(kidId)}/>
 export default Home;

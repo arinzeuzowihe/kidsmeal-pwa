@@ -4,7 +4,7 @@ import MealHistoryEntry from './MealHistoryEntry'
 import MealService from "../services/meal.service";
 import { MealHistory } from "../interfaces/api/responses";
 import Spinner from "./Spinner";
-import { groupBy } from "../interfaces/common/helper.functions";
+import { groupBy } from "../functions/helper.functions";
 
 interface MealHistoryListProps {
     kidID: number;
@@ -47,7 +47,7 @@ function MealHistoryList(props: MealHistoryListProps) {
                 {
                     Object.keys(groupedHistories).map((key, index) => {
                         const mealDate = new Date(key);
-                                if (index == 0) {
+                                if (index === 0) {
                                     return <li key={index} className="uk-open">
                                         <a className="uk-accordion-title" href="./">{ mealDate.toDateString()}</a>
                                         <div className="uk-accordion-content">

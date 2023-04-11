@@ -1,0 +1,12 @@
+.react-switch {
+    vertical-align: middle;
+    margin-left: 4px;
+}
+
+.inactive-badge {
+    background-color: #ff7f50;
+}
+
+.selected-badge {
+    border: 3px black solid;
+}

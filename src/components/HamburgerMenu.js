@@ -1,12 +1,14 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import AuthService from "../services/auth.service.ts";
+import UserService from "../services/user.service.ts";
 
 function HamburgerMenu({ onLogoutCompleted }) {
-    
-    const handleLogout = () => {
+    const userService = UserService.getInstance();
+    const authService = AuthService.getInstance();
+    const userId = userService.getUserID();
 
-        const authService = AuthService.getInstance();
+    const handleLogout = () => {
         authService.logoutAsync();
         onLogoutCompleted();
     }
@@ -21,7 +23,7 @@ function HamburgerMenu({ onLogoutCompleted }) {
                 <ul className="uk-nav uk-nav-dropdown-nav">
                     <li className="uk-active"><Link to="/">Home</Link></li>
                     <li><Link to="/nextmeal">Next Meal</Link></li>
-                    <li><Link to="/meals">Meals</Link></li>
+                    <li><Link to={`/meals/${userId}`}>Meals</Link></li>
                     <li><Link onClick={handleLogout}>Logout</Link></li>
                 </ul>
             </div>

@@ -1,5 +1,6 @@
 import { MealHistoryRequest } from "../interfaces/api/requests";
-import { BaseKid, MealHistory, PendingSuggestion } from "../interfaces/api/responses";
+import { BaseKid, BasicMealPreference, DetailedMealPreference, MealHistory, PendingSuggestion } from "../interfaces/api/responses";
+import { MealType } from "../interfaces/common.interfaces";
 import BaseService from "./base.service";
 
 class MealService extends BaseService {
@@ -44,8 +45,17 @@ class MealService extends BaseService {
 
     }
 
-    getMealOptions(kidIDs: number[]) {
-        
+    public async getMealPreferencesAsync(kidId: number, activeOnly: boolean): Promise<BasicMealPreference[]> {
+        const kidIds: number[] = [kidId];
+        return await this.getCommonMealPreferencesAsync(kidIds, activeOnly);
+    }
+
+    public async getCommonMealPreferencesAsync(kidIds: number[], activeOnly: boolean): Promise<BasicMealPreference[]>  {
+        return await this.postAsync(`/meal/preferences/${activeOnly}`, kidIds);
+    }
+
+    public async getPreferredMealDetails(mealId: number, kidIds: number[]): Promise<DetailedMealPreference> {
+        return await this.postAsync(`/meal/preference/${mealId}`, kidIds);
     }
 
     addMeal(meal: Meal) {
@@ -63,12 +73,6 @@ class MealService extends BaseService {
 
 export default MealService;
 
-enum MealType {
-    Breakfast,
-    Lunch,
-    Snack,
-    Dinner
-}
 
 type Meal = {
     id?: number,
@@ -79,14 +83,8 @@ type Meal = {
     isSide: boolean
 }
 
-type MealHistoryResponse = {
-}
-
 type MealSuggestionRequest = {
     kidIDs: number[],
     mealType: string,
     takeoutAllowed: boolean
-}
-
-type MealSuggestionResponse = {
 }

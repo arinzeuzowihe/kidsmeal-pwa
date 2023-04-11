@@ -25,7 +25,7 @@ const broswerRouter = createBrowserRouter([
         element: <MealQuestionaire />
       },
       {
-        path: "/meals",
+        path: "/meals/:id",
         element: <MealManagement />
       },
       {
