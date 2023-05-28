@@ -132,18 +132,11 @@ function MealManagement() {
         setSelectedKidOption(selectedKidOptionValue);
     };
 
-    const loadPreferencesAysnc = async (preference?: BasicMealPreference) => {
+    const loadPreferencesAysnc = async () => {
         var kidIds = getKidIds();
         if (kidIds.length > 0) {
             var updatedPreferences = await mealService.getCommonMealPreferencesAsync(kidIds, !showInactivePreferences);
             setPreferences(updatedPreferences);
-
-            /*if (preference) {
-                //Using name to look up the meal because in certain use cases like "Adding a new preference"; the call
-                //function will not have a meal ID yet.
-                const preferenceToSelect = updatedPreferences.find(p => p.mealName === selectedMealPrefrenceDetails.mealName);
-                setSelectedPreference(preferenceToSelect);
-            }*/
         }
     }
 
@@ -265,11 +258,7 @@ function MealManagement() {
         var kidIds = getKidIds();
         if (kidIds.length > 0) {
             var response = await mealService.addMealPreferenceAsync(kidIds, selectedMealPrefrenceDetails);
-            await loadPreferencesAysnc({ 
-                mealId: 0,
-                mealName: selectedMealPrefrenceDetails.mealName,
-                isActive: true
-            });
+            await loadPreferencesAysnc();
         }
     };
 
