@@ -50,8 +50,8 @@ class BaseService{
         return await this.fetchAsync(urlFragment, "POST", requiresAuthorization, data);
     }
 
-    protected async deleteAsync(urlFragment: string, requiresAuthorization: boolean = true) {
-        return await this.fetchAsync(urlFragment, "DELETE", requiresAuthorization);
+    protected async deleteAsync(urlFragment: string, data?: any, requiresAuthorization: boolean = true) {
+        return await this.fetchAsync(urlFragment, "DELETE", requiresAuthorization, data);
     }
 
     protected async putAsync(urlFragment: string, data: any, requiresAuthorization: boolean = true) {
@@ -75,7 +75,7 @@ class BaseService{
             if (requiresAuthorization) {
                 headers.append('Authorization', this.getAuthorizationHeader());   
             }
-
+            
             const response = await fetch(`${apiBaseUrl}${urlFragment}`, {
                 method,
                 mode: 'cors',

@@ -36,7 +36,7 @@ export interface DetailedMealPreference {
     mealName: string;
     mealDescription: string;
     mealTypes: number[];
-    isSide: boolean;
+    isSideDish: boolean;
     isTakeout: boolean;
 }
 

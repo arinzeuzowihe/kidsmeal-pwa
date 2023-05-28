@@ -1,4 +1,4 @@
-import { MealHistoryRequest } from "../interfaces/api/requests";
+import { BaseMealPreferenceRequest, MealHistoryRequest, UpsertMealPreferenceRequest } from "../interfaces/api/requests";
 import { BaseKid, BasicMealPreference, DetailedMealPreference, MealHistory, PendingSuggestion } from "../interfaces/api/responses";
 import { MealType } from "../interfaces/common.interfaces";
 import BaseService from "./base.service";
@@ -58,16 +58,46 @@ class MealService extends BaseService {
         return await this.postAsync(`/meal/preference/${mealId}`, kidIds);
     }
 
-    addMeal(meal: Meal) {
-
+    public async addMealPreferenceAsync(kidIds: number[], preferenceDetails: DetailedMealPreference) {
+        const request: UpsertMealPreferenceRequest = {
+            kidIds,
+            mealId: 0,
+            mealName: preferenceDetails.mealName,
+            mealDescription: preferenceDetails.mealDescription,
+            mealTypes: preferenceDetails.mealTypes,
+            isSideDish: preferenceDetails.isSideDish,
+            isTakeout: preferenceDetails.isTakeout,
+            isActive: true
+        }; 
+        
+        return await this.postAsync('/meal/preferences', request);
     }
 
-    updateMeal(meal: Meal) {
+    public async updateMealPreferenceAsync(kidIds: number[], preferenceDetails: DetailedMealPreference, isActive?: boolean) {
+        const request: UpsertMealPreferenceRequest = {
+            kidIds,
+            mealId: preferenceDetails.mealId,
+            mealName: preferenceDetails.mealName,
+            mealDescription: preferenceDetails.mealDescription,
+            mealTypes: preferenceDetails.mealTypes,
+            isSideDish: preferenceDetails.isSideDish,
+            isTakeout: preferenceDetails.isTakeout,
+            isActive
+        }; 
 
+        return await this.putAsync('/meal/preferences', request);
     }
 
-    removeMeal(mealId: number, kidIDs: number[]) {
+    public async restoreMealPreferenceAsync(kidIds: number[], preferenceDetails: DetailedMealPreference): Promise<BasicMealPreference[]> {
+        return await this.updateMealPreferenceAsync(kidIds, preferenceDetails, true);
+    }
 
+    public async removeMealPreferenceAsync(mealId: number, kidIds: number[]): Promise<BasicMealPreference[]> {
+        const request: BaseMealPreferenceRequest = {
+            kidIds,
+            mealId
+        }
+        return await this.deleteAsync('/meal/preferences', request);
     }
 }
 
