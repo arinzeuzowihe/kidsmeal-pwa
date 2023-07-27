@@ -6,6 +6,7 @@ import { BaseKid, BaseMeal, BasicMealPreference, DetailedMealPreference } from "
 import { MealType, SelectOptions } from "../interfaces/common.interfaces";
 import Switch from "react-switch";
 import './MealManagement.css';
+import KidSelection from "./KidSelection";
 
 function MealManagement() {
     const mealService = MealService.getInstance();
@@ -13,7 +14,7 @@ function MealManagement() {
     const kids = userService.getKids();
     const { id } = useParams(); //used url palceholders to validate replacing userService.getUserID()
     const [kidSelectionOptions, setKidSelectionOptions] = useState<SelectOptions[]>([]);
-    const [selectedKidOption, setSelectedKidOption] = useState<string>('0');
+    const [selectedKidIds, setSelectedKidIds] = useState<number[]>([]);
     const [preferences, setPreferences] = useState<BasicMealPreference[]>([]);
     const [selectedPreference, setSelectedPreference] = useState<BasicMealPreference>();
     const [showInactivePreferences, setShowInactivePreferences] = useState<boolean>(false);
@@ -31,10 +32,6 @@ function MealManagement() {
     const [isFormDisabled, setIsFormDisabled] = useState<boolean>(true);
 
     useEffect(() => {
-        loadKidSelectionOptions(kids);
-    }, []);
-
-    useEffect(() => {
         const clearPreferenceSelection = () => {
             if (selectedPreference) {
                 setSelectedPreference(undefined);
@@ -45,7 +42,7 @@ function MealManagement() {
         toggleFormDisabledState();
         loadPreferencesAysnc();
         
-    }, [selectedKidOption]);
+    }, [selectedKidIds]);
 
     useEffect(() => {
         loadPreferencesAysnc();
@@ -66,9 +63,8 @@ function MealManagement() {
                 return;
             }
 
-            var kidIds = getKidIds();
-            if (kidIds.length > 0) {
-                var response = await mealService.getPreferredMealDetails(selectedPreference.mealId, kidIds);
+            if (selectedKidIds.length > 0) {
+                var response = await mealService.getPreferredMealDetails(selectedPreference.mealId, selectedKidIds);
                 setSelectedMealPrefrenceDetails(response);
             }
 
@@ -127,22 +123,20 @@ function MealManagement() {
         setKidSelectionOptions([...selectOptions]);
     };
 
-    const handleKidSelectionChangeAsync = async (event: any) => {
-        const selectedKidOptionValue = event.target.value;
-        setSelectedKidOption(selectedKidOptionValue);
-    };
+    const handleKidSelectionChange = (selectedKidIds: number[]) => {
+        setSelectedKidIds(selectedKidIds);
+    }
 
     const loadPreferencesAysnc = async () => {
-        var kidIds = getKidIds();
-        if (kidIds.length > 0) {
-            var updatedPreferences = await mealService.getCommonMealPreferencesAsync(kidIds, !showInactivePreferences);
+        if (selectedKidIds.length > 0) {
+            var updatedPreferences = await mealService.getCommonMealPreferencesAsync(selectedKidIds, !showInactivePreferences);
             setPreferences(updatedPreferences);
         }
     }
 
     const toggleFormDisabledState = () => {
         const isInactivePreferenceSelected = (selectedPreference && !selectedPreference.isActive) ?? false;
-        const hasKidOptionBeenSelected = (selectedKidOption !== '0');
+        const hasKidOptionBeenSelected = (selectedKidIds.length > 0);
         setIsFormDisabled(!hasKidOptionBeenSelected || isInactivePreferenceSelected);
     };
 
@@ -186,25 +180,6 @@ function MealManagement() {
         setShowInactivePreferences(checked );
     };
 
-    function getKidIds(): number[] {
-        var kidIds: number[] = [];
-        if (selectedKidOption === '0') {
-            return kidIds;
-        }
-
-        if (selectedKidOption === 'all') {
-            kidIds = kids.map((kid, index) => {
-                return kid.id;
-            })
-        }
-        else {
-            const kidId = parseInt(selectedKidOption, 10);
-            kidIds.push(kidId);
-        }
-
-        return kidIds;
-    }
-
     const handleDetailChanges = (evt:any) => {
         if (!evt?.target) {
             return;
@@ -239,9 +214,8 @@ function MealManagement() {
     }
 
     const handleRemoveMealPreference = async (preference: BasicMealPreference) => {
-        var kidIds = getKidIds();
-        if (kidIds.length > 0) {
-            var response = await mealService.removeMealPreferenceAsync(preference.mealId, kidIds);
+        if (selectedKidIds.length > 0) {
+            var response = await mealService.removeMealPreferenceAsync(preference.mealId, selectedKidIds);
             if (selectedPreference) {
                 setSelectedPreference({ ...selectedPreference, isActive: false });   
             }
@@ -255,25 +229,22 @@ function MealManagement() {
     };
 
     const handleAddMealPreference = async () => {
-        var kidIds = getKidIds();
-        if (kidIds.length > 0) {
-            var response = await mealService.addMealPreferenceAsync(kidIds, selectedMealPrefrenceDetails);
+        if (selectedKidIds.length > 0) {
+            var response = await mealService.addMealPreferenceAsync(selectedKidIds, selectedMealPrefrenceDetails);
             await loadPreferencesAysnc();
         }
     };
 
     const handleUpdateMealPreference = async () => {
-        var kidIds = getKidIds();
-        if (kidIds.length > 0 && selectedPreference) {
-            var response = await mealService.updateMealPreferenceAsync(kidIds, selectedMealPrefrenceDetails, selectedPreference.isActive);
+        if (selectedKidIds.length > 0 && selectedPreference) {
+            var response = await mealService.updateMealPreferenceAsync(selectedKidIds, selectedMealPrefrenceDetails, selectedPreference.isActive);
             setSelectedPreference({ ...selectedPreference, mealName: selectedMealPrefrenceDetails.mealName }); 
         }
     };
 
     const handleRestoreMealPreference = async () => {
-        var kidIds = getKidIds();
-        if (kidIds.length > 0) {
-            var response = await mealService.restoreMealPreferenceAsync(kidIds, selectedMealPrefrenceDetails);
+        if (selectedKidIds.length > 0) {
+            var response = await mealService.restoreMealPreferenceAsync(selectedKidIds, selectedMealPrefrenceDetails);
             if (selectedPreference) {
                 setSelectedPreference({ ...selectedPreference, isActive: true });   
             }
@@ -290,19 +261,7 @@ function MealManagement() {
         <div className="uk-position-center">
             <div className="uk-card uk-card-default uk-width-xlarge">
                 <div className="uk-card-header">
-                    <select className="uk-select" value={selectedKidOption} onChange={handleKidSelectionChangeAsync}>
-                        {
-                            kidSelectionOptions.map(kidOption => (
-                                <option
-                                    disabled={kidOption.disabled}
-                                    key={kidOption.value}
-                                    value={kidOption.value}
-                                >
-                                    {kidOption.text}
-                                </option>
-                            ))
-                        }
-                    </select>
+                    <KidSelection kids={kids} onSelectionChange={handleKidSelectionChange}/>
                 </div>
                 <div className="uk-card-body">
                     <div className="uk-align-left">

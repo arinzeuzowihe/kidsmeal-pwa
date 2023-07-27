@@ -1,4 +1,5 @@
 import { MealType } from "../common.interfaces";
+import { MealSuggestion } from "./responses";
 
 export interface MealHistoryRequest {
     kidIds: number[],
@@ -22,4 +23,15 @@ export interface UpsertMealPreferenceRequest extends BaseMealPreferenceRequest {
     isSideDish: boolean;
     isTakeout: boolean;
     isActive?: boolean;
+}
+
+export interface MealSuggestionRequest {
+    kidIds: number[],
+    mealType: number,
+    includeTakeOut: boolean
+}
+
+export interface SaveMealSuggestionRequest {
+    ignorePendingSuggestions?: boolean;
+    mealSuggestions: MealSuggestion[];
 }

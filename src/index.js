@@ -9,6 +9,9 @@ import Home from './components/Home';
 import MealQuestionaire from './components/MealQuestionaire';
 import MealManagement from './components/MealManagement';
 import LoginForm from './components/LoginForm';
+import  store  from './redux/store'
+import { Provider } from 'react-redux';
+import MealSuggestionList from './components/MealSuggestionList';
 
 //https://reactrouter.com/en/main/start/tutorial
 const broswerRouter = createBrowserRouter([
@@ -29,6 +32,10 @@ const broswerRouter = createBrowserRouter([
         element: <MealManagement />
       },
       {
+        path: "/suggestions",
+        element: <MealSuggestionList />
+      },
+      {
         path: "/logout",
         element: <LoginForm />
       }
@@ -38,9 +45,11 @@ const broswerRouter = createBrowserRouter([
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
-  <React.StrictMode>
-    <RouterProvider router={broswerRouter} />
-  </React.StrictMode>
+  <Provider store={store}>
+    <React.StrictMode>
+      <RouterProvider router={broswerRouter} />
+    </React.StrictMode>
+  </Provider>
 );
 
 

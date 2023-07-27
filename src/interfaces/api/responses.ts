@@ -9,9 +9,10 @@ export interface BaseMeal {
     mealType: string    
 };
 
-export interface PendingSuggestion extends BaseMeal {
+export interface MealSuggestion extends BaseMeal {
     suggestionID: number,
-    kidId: number
+    kidID: number,
+    isConfirmed: boolean
 };
 
 export interface MealHistory extends BaseMeal {

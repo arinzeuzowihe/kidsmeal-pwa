@@ -3,18 +3,22 @@ import MealHistoryList from "./MealHistoryList";
 import './Home.css'
 import MealService from "../services/meal.service";
 import MealSuggestionList from "./MealSuggestionList";
-import { BaseKid, PendingSuggestion } from "../interfaces/api/responses";
+import { BaseKid, MealSuggestion } from "../interfaces/api/responses";
 import Spinner from "./Spinner";
 import UserService from "../services/user.service";
+import { useNavigate } from "react-router-dom";
+import { useAppDispatch } from "../hooks/reduxHooks";
+import { storeGeneratedSuggestions } from "../redux/slices/mealSuggestionSlice";
 
 function Home(props: any) {
     const [isLoading, setIsLoading] = useState(false);
-    const [pendingSuggestions, setPendingSuggestions] = useState<PendingSuggestion[]>([]);
-    const [hasPendingSuggestions, setHasPendingSuggestions] = useState<boolean>(false);
+    const [pendingSuggestions, setPendingSuggestions] = useState<MealSuggestion[]>([]);
     const [kids, setKids] = useState<BaseKid[]>([]);
     const mealService = MealService.getInstance();
     const userService = UserService.getInstance();
     const [selectedKidId, setSelectedKidId] = useState<number>(0);
+    const navigate = useNavigate();
+    const dispatch = useAppDispatch();
 
     useEffect(() => {
 
@@ -22,24 +26,30 @@ function Home(props: any) {
             setIsLoading(true);
             const results = await mealService.getPendingMealSuggestionsAsync();
             setPendingSuggestions(results);
-            setHasPendingSuggestions(pendingSuggestions && pendingSuggestions.length > 0);
-            if (!hasPendingSuggestions) {
-                setKids(() => userService.getKids());
-            }
             setIsLoading(false);
         };
 
         fecthPendingSuggestions()
             .catch(console.error);
 
-    },[]);
+    }, []);
+    
+    useEffect(() => {
+        const hasPendingSuggestions = pendingSuggestions && pendingSuggestions.length > 0;
+        if (hasPendingSuggestions) {
+            
+            dispatch(storeGeneratedSuggestions({ suggestions: pendingSuggestions }))
+            navigate('/suggestions');
+            
+            return;
+        }
+
+        setKids(() => userService.getKids());
+
+    }, [pendingSuggestions])
     
     if (isLoading) {
         return <Spinner ratio="5" text="Loading...."/>
-    }
-    
-    if (hasPendingSuggestions) {
-        return <MealSuggestionList suggestions={pendingSuggestions} displayOnly={false}/>
     }
     
     return (

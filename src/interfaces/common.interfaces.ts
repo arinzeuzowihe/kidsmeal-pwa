@@ -10,3 +10,9 @@ export enum MealType {
     Snack,
     Dinner
 }
+
+export interface MealSuggestionParams {
+    kidIds: number[],
+    mealType?: MealType,
+    includeTakeout?: boolean
+}

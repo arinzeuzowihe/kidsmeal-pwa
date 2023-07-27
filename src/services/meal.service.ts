@@ -1,5 +1,5 @@
-import { BaseMealPreferenceRequest, MealHistoryRequest, UpsertMealPreferenceRequest } from "../interfaces/api/requests";
-import { BaseKid, BasicMealPreference, DetailedMealPreference, MealHistory, PendingSuggestion } from "../interfaces/api/responses";
+import { BaseMealPreferenceRequest, MealHistoryRequest, UpsertMealPreferenceRequest, MealSuggestionRequest, SaveMealSuggestionRequest } from "../interfaces/api/requests";
+import { BaseKid, BasicMealPreference, DetailedMealPreference, MealHistory, MealSuggestion } from "../interfaces/api/responses";
 import { MealType } from "../interfaces/common.interfaces";
 import BaseService from "./base.service";
 
@@ -35,14 +35,29 @@ class MealService extends BaseService {
         return [];
     }
 
-    public async getPendingMealSuggestionsAsync(): Promise<PendingSuggestion[]> {
+    public async getPendingMealSuggestionsAsync(): Promise<MealSuggestion[]> {
         const kidIds = this.currentKids?.map((kid: BaseKid) => { return kid.id});
         const response = await this.postAsync('/meal/suggestion/pending', kidIds);
-        return response.pendingSuggestions as PendingSuggestion[];
+        return response.pendingSuggestions as MealSuggestion[];
     }
 
-    getMealSuggestion(request: MealSuggestionRequest) {
+    public async getMealSuggestionAsync(kidIds: number[], mealType: MealType, includeTakeOut: boolean): Promise<MealSuggestion[]> {
+        const request: MealSuggestionRequest = {
+            kidIds,
+            mealType,
+            includeTakeOut
+        }
+        const response = await this.postAsync('/meal/suggestion/generate', request);
+        return response?.pendingSuggestions;
+    }
 
+    public async saveMealSuggestionsAsync(suggestedMeals: MealSuggestion[]):Promise<MealSuggestion[]> {
+        const request: SaveMealSuggestionRequest = {
+            mealSuggestions: suggestedMeals
+        };
+
+        const reponse = await this.postAsync('/meal/suggestion', request);
+        return reponse.pendingSuggestions;
     }
 
     public async getMealPreferencesAsync(kidId: number, activeOnly: boolean): Promise<BasicMealPreference[]> {
@@ -111,10 +126,4 @@ type Meal = {
     types: MealType[],
     isTakeOut: boolean,
     isSide: boolean
-}
-
-type MealSuggestionRequest = {
-    kidIDs: number[],
-    mealType: string,
-    takeoutAllowed: boolean
 }
