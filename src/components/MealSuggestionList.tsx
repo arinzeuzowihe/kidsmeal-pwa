@@ -1,40 +1,87 @@
 import React, { useEffect } from "react";                                                                                          
-import { MealSuggestion } from "../interfaces/api/responses";
-import {faCancel, faCheck, faEdit, faRepeat, faThumbsDown, faTry, faX} from '@fortawesome/free-solid-svg-icons'
+import { BasicMealPreference, MealSuggestion } from "../interfaces/api/responses";
+import {faCancel, faCheck, faEdit, faFrown, faRepeat, faSmile} from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { MealType } from "../interfaces/common.interfaces";
 import MealService from "../services/meal.service";
 import { useNavigate } from "react-router-dom";
-import { toast } from "react-toastify"
+import { ToastContainer, toast } from "react-toastify"
 import { useAppDispatch, useAppSelector } from "../hooks/reduxHooks";
 import { clearStoredSuggestions, storeGeneratedSuggestions } from "../redux/slices/mealSuggestionSlice";
+import { MealSuggestionReview } from "../interfaces/api/requests";
 
+interface AlternateMeal extends BasicMealPreference {
+    mealDescription: string;
+}
 
+interface ReviewableMealSuggestion extends MealSuggestion {
+    selectedAlternateMeal?: AlternateMeal,
+    wasMealLiked?: boolean,
+    alternateMealOptions: BasicMealPreference[]
+}
 
 function MealSuggestionList() {
     const mealService = MealService.getInstance();
-    const suggestions = useAppSelector((state) => state.mealSuggestion.suggestions);
+    const storedSuggestions = useAppSelector((state) => state.mealSuggestion.suggestions);
     const generationParams = useAppSelector((state) => state.mealSuggestion.params);
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
 
-    const [isReview, setIsReview] = React.useState<boolean>();
+    const [isReviewInProgress, setIsReviewInProgress] = React.useState<boolean>();
     const [suggestionsToRetry, setsuggestionsToRetry] = React.useState<MealSuggestion[]>([]);
     const [isEdit, setIsEdit] = React.useState<boolean>();
-    const [isOtherOptionSelected, setIsOtherOptionSelected] = React.useState<boolean>();
+    const [trackedAlternateMealSelection, setTrackedAlternateMealSelection] = React.useState<AlternateMeal>();
+    const [reviewableSuggestions, setReviewableSuggestions] = React.useState<ReviewableMealSuggestion[]>(storedSuggestions.map((suggestion) => {
+        return {
+            ...suggestion,
+            alternateMealOptions: []
+        }
+    }));
 
+    useEffect(() => { 
+
+        var updatedSuggestions: ReviewableMealSuggestion[] = [];
+
+        if (isReviewInProgress) {
+            // When reviews are in progess, the user may have made changes to our copy of reviewable 
+            // suggestions in local state (e.g.selected alternate meal or rated something). Therefore
+            //we need to merge the latest meal suggestion data (i.e. from selector) with any user edits
+            //we already have locally in state.
+            updatedSuggestions = reviewableSuggestions.map((reviewableSuggestion) => {
+
+                const mealSuggestion = storedSuggestions.find(s => s.mealName == reviewableSuggestion.mealName);
+                return {
+                    ...mealSuggestion,
+                    ...reviewableSuggestion
+                }
+            });
+        }
+        else {
+            // We are not reviewing, the only time our suggestions in the store will change is if user has requested new suggestions
+            // to be generated. Therefore just re-map the selectors value to our local state
+            updatedSuggestions = storedSuggestions.map((suggestion) => {
+                return {
+                    ...suggestion,
+                    alternateMealOptions: []
+                }
+            });
+        }
+
+        setReviewableSuggestions(updatedSuggestions);
+
+    }, [storedSuggestions])
 
     useEffect(() => {
         //All suggestions have suggestionIds = 0 => not persisted and unconfirmed
         //All suggestions have suggestionIds > 0 => persisted
         //All persisted suggestion have isConfirmed = false => unconfirmed and require view
 
-        const areSavedSuggestions = !suggestions.some(s => s.suggestionID === 0);
+        const areSavedSuggestions = !reviewableSuggestions.some(s => s.suggestionID === 0);
 
         if (areSavedSuggestions) {
-            const hasAnyUnconfirmedSuggestions = suggestions.some(s => !s.isConfirmed);
+            const hasAnyUnconfirmedSuggestions = reviewableSuggestions.some(s => !s.isConfirmed);
             if (hasAnyUnconfirmedSuggestions) {
-                setIsReview(true);
+                setIsReviewInProgress(true);
             }
             else {
                 //Redirect to meal questionaire because there is nothing to do; the user has already reviewed (i.e. confirmed)
@@ -56,20 +103,49 @@ function MealSuggestionList() {
     }, []);
 
     useEffect(() => {
-        if (!suggestions || suggestions.length <= 0 || isReview) {
+        if (!isReviewInProgress) {
+            return;
+        }
+
+        //retrieve the preferred meals for each kid
+        const populateAlternateOptions = async () => {
+
+            const updatedSuggestions = await Promise.all(reviewableSuggestions.map(async (suggestion) => {
+            
+                //we need to get all the meal preferences for each kid and our api
+                //will return the meal preferences common to all kids if we supply multiple
+                //kidIds; so get each one-by-one for now.
+                var mealPreferences: BasicMealPreference[] = await mealService.getMealPreferencesAsync(suggestion.kidId, true);
+
+                return {
+                    ...suggestion,
+                    alternateMealOptions: mealPreferences
+                };
+            }));
+
+            setReviewableSuggestions(updatedSuggestions);
+        };
+
+        populateAlternateOptions()
+            .catch(console.error);
+
+    }, [isReviewInProgress]);
+
+    useEffect(() => {
+        if (!reviewableSuggestions || reviewableSuggestions.length <= 0 || isReviewInProgress) {
             return;
         }
 
         //Not all suggestions have been saved and thus we are not ready to 
         //review suggestions (e.g. after suggestions are tried again)
-        if (suggestions.some(s => s.suggestionID === 0)) {
+        if (reviewableSuggestions.some(s => s.suggestionID === 0)) {
             setsuggestionsToRetry([]); //clear any retried suggestions
             return;
         }
 
-        const hasAnyUnconfirmedSuggestions = suggestions.some(s => !s.isConfirmed);
+        const hasAnyUnconfirmedSuggestions = reviewableSuggestions.some(s => !s.isConfirmed);
         if (hasAnyUnconfirmedSuggestions) {
-            setIsReview(true);
+            setIsReviewInProgress(true);
         }
         else {
             //Redirect to meal questionaire because there is nothing to do; the user has already reviewed (i.e. confirmed)
@@ -77,27 +153,26 @@ function MealSuggestionList() {
             navigate('/nextmeal');
         }
 
-    }, [suggestions])
+    }, [reviewableSuggestions])
 
     const trackSuggestionsToRetry = (suggestion: MealSuggestion) => {
         if (!suggestion) {
             return;
         }
 
-        const existingSuggestionToRetry = suggestionsToRetry.find(s => s.kidID == suggestion.kidID && s.mealName === suggestion.mealName);
+        const existingSuggestionToRetry = suggestionsToRetry.find(s => s.kidId == suggestion.kidId && s.mealName === suggestion.mealName);
         if (existingSuggestionToRetry) {
             setsuggestionsToRetry(suggestionsToRetry.filter(s => s !== existingSuggestionToRetry));
         }
         else {
             setsuggestionsToRetry([...suggestionsToRetry, suggestion]);
         }
-        
     }
 
     const generateNewSuggestionsAsync = async() => {
 
         //Get kidIds of unconfirmed suggestions
-        const kidIds = suggestionsToRetry.map(s => { return s.kidID });
+        const kidIds = suggestionsToRetry.map(s => { return s.kidId });
 
         //Use props to re-execute api call
         const mealTypeEnumValue = Number(generationParams.mealType);
@@ -106,7 +181,7 @@ function MealSuggestionList() {
         }
 
         const response = await mealService.getMealSuggestionAsync(kidIds, generationParams.mealType, generationParams.includeTakeout);
-        const updatedSuggestions = [...suggestions.filter(s => !kidIds.includes(s.kidID)), ...response];  //Update local copy of suggestions in state
+        const updatedSuggestions = [...reviewableSuggestions.filter(s => !kidIds.includes(s.kidId)), ...response];  //Update local copy of suggestions in state
         dispatch(storeGeneratedSuggestions({suggestions: updatedSuggestions}));
     }
 
@@ -116,13 +191,13 @@ function MealSuggestionList() {
             return;
         }
 
-        if (!suggestions || suggestions.length <= 0) {
+        if (!reviewableSuggestions || reviewableSuggestions.length <= 0) {
             return;
         }
 
         //Make the api call to saves all suggestions
-        const finalizedSuggestions = await mealService.saveMealSuggestionsAsync(suggestions);
-        dispatch(storeGeneratedSuggestions({suggestions: finalizedSuggestions}));
+        const finalizedSuggestions = await mealService.saveMealSuggestionsAsync(reviewableSuggestions);
+        dispatch(storeGeneratedSuggestions({ suggestions: finalizedSuggestions }));
     }
 
     const cancelSuggestions = () => {
@@ -131,50 +206,133 @@ function MealSuggestionList() {
         navigate('/nextmeal');
     }
 
-    const submitReview = () => {
-        //TODO:
-
+    const submitReview = async () => {
         //Make api to confirm the suggestions and record the history of the meal
+        var reviews: MealSuggestionReview[] = reviewableSuggestions.map((suggestion) => {
+            let review: MealSuggestionReview = {
+                mealSuggestionID: suggestion.suggestionID,
+                wasMealLiked: !!suggestion.wasMealLiked
+            };
 
-        //Redirect to home
+            if (suggestion.selectedAlternateMeal) {
+                review.alternateMealID = suggestion.selectedAlternateMeal.mealId;
+                review.alternateMealName = suggestion.selectedAlternateMeal.mealName;
+                review.alternateMealDescription = suggestion.selectedAlternateMeal.mealDescription;
+            }
+
+            return review;
+        });
+
+        await mealService.reviewMealSuggestionsAsync(reviews).then(() => {
+            //Redirect to home
+            navigate('/');
+        });
+    }
+
+    const trackAlternateMealSelectionChange = async (suggestionID: number, alternateMealId: number) => {
+        
+        let mealSuggestionToUpdate = reviewableSuggestions.find(s => s.suggestionID === suggestionID);
+        if (!mealSuggestionToUpdate) {
+            return;
+        }
+
+        //TODO: Might want to cache these calls just in case they are done over and over again
+        var meal = await mealService.getMealAsync(alternateMealId); 
+        
+        let selectedAltMealOption = mealSuggestionToUpdate.alternateMealOptions.find(m => m.mealId === alternateMealId);
+
+        if (selectedAltMealOption) {
+            setTrackedAlternateMealSelection({ ...selectedAltMealOption, mealDescription: meal.mealDescription });
+        }
+    }
+
+    const rateMealSuggestion = (suggestionID: number, wasMealLiked: boolean) => {
+        let mealSuggestionToRate = reviewableSuggestions.find(s => s.suggestionID === suggestionID);
+        if (!mealSuggestionToRate) {
+            return;
+        }
+
+        mealSuggestionToRate.wasMealLiked = wasMealLiked;
+        setReviewableSuggestions([...reviewableSuggestions.filter(s => s.suggestionID !== suggestionID), mealSuggestionToRate]);
     }
 
     const initiateSuggestionEdit = () => {
         setIsEdit(true);
     }
 
-    const cancelSuggestionEdit = () => {
+    const cancelAlternateMealChange = (suggestionID: number) => {
+
+        const mealSuggestionToRevert = reviewableSuggestions.find(s => s.suggestionID === suggestionID);
+        if (!mealSuggestionToRevert) {
+            return;
+        }
+
+        //simply clear any tracked changes
+        setTrackedAlternateMealSelection(undefined);
+
         setIsEdit(false);
     }
 
-    const acceptSuggestionEdit = () => {
+    const acceptAlternateMealChange = (suggestionID: number) => {
+
+        //Check if we have tracked an change to an alternate meal option
+        if (!trackedAlternateMealSelection) {
+            return;
+        }
+
+        let mealSuggestionToUpdate = reviewableSuggestions.find(s => s.suggestionID === suggestionID);
+        if (!mealSuggestionToUpdate) {
+            return;
+        }
+
+        //clear any previous ratings
+        mealSuggestionToUpdate.wasMealLiked = undefined;
+        
+        //Update the alternate meal
+        const wasChangedBackToInitialSuggestion = trackedAlternateMealSelection.mealName === mealSuggestionToUpdate.mealName;
+        mealSuggestionToUpdate.selectedAlternateMeal = wasChangedBackToInitialSuggestion ? undefined : trackedAlternateMealSelection;
+        setReviewableSuggestions([...reviewableSuggestions.filter(s => s.suggestionID !== suggestionID), mealSuggestionToUpdate]);
+
         setIsEdit(false);
+
+        //you can clear the selected meal option because we alreayd have it saved in our meal suggestion object
+        setTrackedAlternateMealSelection(undefined);
     }
 
     return (
-        <div className="uk-border-rounded uk-position-center">
+        <>
+            <ToastContainer position="bottom-right"
+                autoClose={5000}
+                hideProgressBar={true}
+                newestOnTop={false}
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover />
+                    <div className="uk-border-rounded uk-position-center">
             <div className="uk-card uk-card-default uk-width-xlarge">
                 <div className="uk-card-header">
                     {
-                        !isReview && <h5 className="uk-align-right"><FontAwesomeIcon size="xl" icon={faRepeat} /> - suggestions to try again</h5>
+                        !isReviewInProgress && <h5 className="uk-align-right"><FontAwesomeIcon size="xl" icon={faRepeat} /> - suggestions to try again</h5>
                     }
                     {
-                        isReview && <h5 className="uk-align-">Please let us know how feeding the kiddos went?</h5>
+                        isReviewInProgress && <h4>Please let us know how feeding the kiddos went?</h4>
                     }
                 </div>
                 <div className="uk-card-body">
                     {
-                        suggestions.map((suggestion, index) => {
+                        reviewableSuggestions.map((suggestion, index) => {
                             return <article key={index} className="uk-comment uk-comment-primary" role="comment">
                                 <header className="uk-comment-header">
                                     {
-                                        isReview && <div className="uk-align-right">
+                                        isReviewInProgress && <div className="uk-align-right">
                                             {
                                                 isEdit && <>
-                                                    <a className="uk-icon-button" onClick={() => acceptSuggestionEdit()}>
+                                                    <a className="uk-icon-button" onClick={() => acceptAlternateMealChange(suggestion.suggestionID)}>
                                                         <FontAwesomeIcon size="xl" icon={faCheck} color="green" />
                                                     </a>
-                                                    <a className="uk-icon-button" onClick={() => cancelSuggestionEdit()}>
+                                                    <a className="uk-icon-button" onClick={() => cancelAlternateMealChange(suggestion.suggestionID)}>
                                                         <FontAwesomeIcon size="xl" icon={faCancel} color="red" />
                                                     </a>
                                                 </>
@@ -190,46 +348,62 @@ function MealSuggestionList() {
                                         <div className="uk-width-auto">
                                             <img className="uk-border-circle" src="https://styles.redditmedia.com/t5_2sws5/styles/communityIcon_shz4ogqfbtw81.png" width="50" height="50" alt="" />
                                         </div>
-                                        <div className="uk-wdith-expand">
+                                        <div className="uk-width-expand">
                                             <h4 className="uk-comment-title uk-margin-remove">
                                                 {
-                                                    !isEdit && suggestion.mealName
+                                                    !isEdit && (suggestion.selectedAlternateMeal ? suggestion.selectedAlternateMeal.mealName : suggestion.mealName)
                                                 }
                                                 {
-                                                    isEdit && <select className="uk-select" disabled={!isEdit}>
-                                                        <option value={"1"}>RRRRR</option>
+                                                    isEdit && <select className="uk-select uk-width-medium"
+                                                    disabled={!isEdit}
+                                                    defaultValue={suggestion.alternateMealOptions.find(o => o.mealName == (suggestion.selectedAlternateMeal ? suggestion.selectedAlternateMeal.mealName : suggestion.mealName))?.mealId}
+                                                        onChange={(evt) => trackAlternateMealSelectionChange(suggestion.suggestionID, Number(evt.target.value))}>
+                                                        {
+                                                            suggestion.alternateMealOptions.map((mealOption, index) => {
+                                                                return <option key={index}
+                                                                    value={mealOption.mealId}>{mealOption.mealName}</option>
+                                                             })
+                                                        }                                                  
                                                     </select>
                                                 }
                                             </h4>
-                                            <ul className="uk-comment-meta uk-subnav uk-subnav-divider uk-margin-remove-top">
-                                                <li>{isNaN(Number(suggestion.mealType)) ? "N/A" : MealType[Number(suggestion.mealType)]}</li>
-                                                {
-                                                    !isReview &&<li>
-                                                        <a className="uk-icon-button" onClick={() => trackSuggestionsToRetry(suggestion)}>
-                                                            <FontAwesomeIcon size="2xl" icon={faRepeat} color={suggestionsToRetry.some(s => s === suggestion) ? "#333" : "#999"} />
-                                                        </a>
-                                                    </li>
-                                                }
-                                            </ul>
+                                            {
+                                                !isEdit && <ul className="uk-comment-meta uk-subnav uk-subnav-divider uk-margin-remove-top">
+                                                    <li>{isNaN(Number(suggestion.mealType)) ? "N/A" : MealType[Number(suggestion.mealType)]}</li>
+                                                    {
+                                                        !isReviewInProgress &&<li>
+                                                            <a className="uk-icon-button" onClick={() => trackSuggestionsToRetry(suggestion)}>
+                                                                <FontAwesomeIcon size="2xl" icon={faRepeat} color={suggestionsToRetry.some(s => s === suggestion) ? "#333" : "#999"} />
+                                                            </a>
+                                                        </li>
+                                                    }
+                                                    {
+                                                        isReviewInProgress &&<li>
+                                                            <a className="uk-icon-button" onClick={() => rateMealSuggestion(suggestion.suggestionID, true)}>
+                                                                <FontAwesomeIcon size="2xl" icon={faSmile} color={suggestion.wasMealLiked ? "#333" : "#999"} />
+                                                            </a>
+                                                            <a className="uk-icon-button" onClick={() => rateMealSuggestion(suggestion.suggestionID, false)}>
+                                                                <FontAwesomeIcon size="2xl" icon={faFrown} color={suggestion.wasMealLiked !== undefined && !suggestion.wasMealLiked ? "#333" : "#999"} />
+                                                            </a>
+                                                        </li>
+                                                    }
+                                                </ul>
+                                            }
                                         </div>
                                     </div>
                                 </header>
-                                <div className="uk-comment-body">
-                                    {
-                                        !isOtherOptionSelected && <p>{suggestion.mealDescription}</p>
-                                    }
-                                    {
-                                        isOtherOptionSelected && <textarea className="uk-textarea"></textarea>
-                                    }
-                                    
-                                </div>
+                                {
+                                    !isEdit && <div className="uk-comment-body">
+                                        <p>{suggestion.selectedAlternateMeal ? suggestion.selectedAlternateMeal.mealDescription : suggestion.mealDescription}</p>
+                                    </div>
+                                }
                             </article>
                         })
                     }
                 </div>
                 <div className="uk-card-footer">
                 {
-                        !isReview && <>
+                        !isReviewInProgress && <>
                             <div className="uk-margin uk-form-controls uk-align-center">
                                 <button className="uk-button uk-button-default uk-width-small uk-align-left" onClick={cancelSuggestions}>Cancel</button>
                                 {
@@ -245,13 +419,16 @@ function MealSuggestionList() {
                         
                 }
                 {
-                    isReview && <div className="uk-margin uk-form-controls uk-align-center">
-                        <button className="uk-button uk-button-primary uk-width-medium uk-align-center">Submit Feedback</button>
+                    isReviewInProgress && <div className="uk-margin uk-form-controls uk-align-center">
+                            <button className="uk-button uk-button-primary uk-width-medium uk-align-center"
+                                disabled={reviewableSuggestions.some(s => s.wasMealLiked === undefined)}
+                                onClick={() => submitReview()}>Submit Feedback</button>
                     </div>
                 }
                 </div>
             </div>
         </div>
+        </>
     );
 }
 

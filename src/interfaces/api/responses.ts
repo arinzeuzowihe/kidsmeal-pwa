@@ -4,20 +4,22 @@ export interface BaseKid {
 };
 
 export interface BaseMeal {
+    mealId?: number;
     mealName: string,
-    mealDescription: string,
-    mealType: string    
+    mealDescription: string  
 };
 
 export interface MealSuggestion extends BaseMeal {
     suggestionID: number,
-    kidID: number,
-    isConfirmed: boolean
+    kidId: number,
+    isConfirmed: boolean,
+    mealType: string
 };
 
 export interface MealHistory extends BaseMeal {
     kidID: number,
-    eatenOn: string
+    eatenOn: string,
+    mealType: string
 }
 
 export interface LoginResponse {

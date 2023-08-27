@@ -9,6 +9,7 @@ import UserService from "../services/user.service";
 import { useNavigate } from "react-router-dom";
 import { useAppDispatch } from "../hooks/reduxHooks";
 import { storeGeneratedSuggestions } from "../redux/slices/mealSuggestionSlice";
+import { toast } from "react-toastify";
 
 function Home(props: any) {
     const [isLoading, setIsLoading] = useState(false);

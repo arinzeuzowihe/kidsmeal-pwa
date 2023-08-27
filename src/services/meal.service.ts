@@ -1,5 +1,5 @@
-import { BaseMealPreferenceRequest, MealHistoryRequest, UpsertMealPreferenceRequest, MealSuggestionRequest, SaveMealSuggestionRequest } from "../interfaces/api/requests";
-import { BaseKid, BasicMealPreference, DetailedMealPreference, MealHistory, MealSuggestion } from "../interfaces/api/responses";
+import { BaseMealPreferenceRequest, MealHistoryRequest, UpsertMealPreferenceRequest, MealSuggestionRequest, SaveMealSuggestionRequest, MealSuggestionReview, ReviewMealSuggestionsRequest } from "../interfaces/api/requests";
+import { BaseKid, BaseMeal, BasicMealPreference, DetailedMealPreference, MealHistory, MealSuggestion } from "../interfaces/api/responses";
 import { MealType } from "../interfaces/common.interfaces";
 import BaseService from "./base.service";
 
@@ -18,6 +18,10 @@ class MealService extends BaseService {
         }
 
         return MealService.instance;
+    }
+
+    async getMealAsync(mealId: number): Promise<BaseMeal> {
+        return await this.getAsync(`/meal/${mealId}`);
     }
 
     async getMealHistoryAsync(kidId: number, totalDays?: number): Promise<MealHistory[]> {
@@ -113,6 +117,15 @@ class MealService extends BaseService {
             mealId
         }
         return await this.deleteAsync('/meal/preferences', request);
+    }
+
+    public async reviewMealSuggestionsAsync(reviews: MealSuggestionReview[]): Promise<void> {
+        var request: ReviewMealSuggestionsRequest = {
+            userID: this.currentUserID,
+            reviews
+        };
+
+        await this.postAsync('/meal/suggestion/review', request);
     }
 }
 

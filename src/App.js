@@ -4,6 +4,7 @@ import './App.css';
 import HamburgerMenu from './components/HamburgerMenu';
 import Header from './components/Header';
 import LoginForm from './components/LoginForm.js';
+import 'react-toastify/dist/ReactToastify.css';
 
 function App(props) {
   const [isUserLoggedIn, setisUserLoggedIn] = useState(false);

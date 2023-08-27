@@ -1,4 +1,3 @@
-import { MealType } from "../common.interfaces";
 import { MealSuggestion } from "./responses";
 
 export interface MealHistoryRequest {
@@ -34,4 +33,17 @@ export interface MealSuggestionRequest {
 export interface SaveMealSuggestionRequest {
     ignorePendingSuggestions?: boolean;
     mealSuggestions: MealSuggestion[];
+}
+
+export interface MealSuggestionReview {
+    mealSuggestionID: number;
+    alternateMealID?: number;
+    alternateMealName?: string;
+    alternateMealDescription?: string;
+    wasMealLiked: boolean;
+}
+
+export interface ReviewMealSuggestionsRequest {
+    userID: number,
+    reviews: MealSuggestionReview[]
 }
