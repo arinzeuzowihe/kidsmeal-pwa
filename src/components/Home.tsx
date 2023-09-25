@@ -27,11 +27,13 @@ function Home(props: any) {
             setIsLoading(true);
             const results = await mealService.getPendingMealSuggestionsAsync();
             setPendingSuggestions(results);
-            setIsLoading(false);
         };
 
         fecthPendingSuggestions()
-            .catch(console.error);
+            .catch(console.error)
+            .finally(() => {
+                setIsLoading(false);
+            });
 
     }, []);
     

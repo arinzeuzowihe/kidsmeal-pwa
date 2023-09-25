@@ -1,3 +1,8 @@
+export interface BaseUser {
+    id: number,
+    username: string
+};
+
 export interface BaseKid {
     id: number,
     name: string
@@ -24,8 +29,10 @@ export interface MealHistory extends BaseMeal {
 
 export interface LoginResponse {
     userID: number,
+    username: string,
     wasSuccessful: boolean,
-    kids: Kid[]
+    kids: Kid[],
+    errorMessage: string
 }
 
 export interface BasicMealPreference {

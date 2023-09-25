@@ -29,11 +29,15 @@ function MealHistoryList(props: MealHistoryListProps) {
                 const mealsGroupedByDate = groupBy(recentMealHistories, 'eatenOn');                
                 setGroupedHistories(mealsGroupedByDate);
             }
-            setIsLoading(false);
         };
 
         fetchMealHistory()
-            .catch(errorMessage => console.error(errorMessage));
+            .catch((errorMessage) => {
+                console.error(errorMessage)
+            })
+            .finally(() => {
+                setIsLoading(false);
+            });
 
     }, [props.refreshData]);
 

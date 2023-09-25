@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import AuthService from "../services/auth.service.ts";
 import Spinner from "./Spinner";
@@ -9,15 +9,21 @@ function LoginForm({ onLoginCompleted }) {
     const [isLoading, setIsLoading] = useState(false);
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const [loginError, setLoginError] = useState('');
     const authService = AuthService.getInstance();
 
     const handleLoginAsync = async () => {
         setIsLoading(true);
 
+        setLoginError('');
+
         //Make API call
         const response = await authService.loginAsync({ username, password });
 
-        const userInfo = response.wasSuccessful ? { userId: response.userID, username } : undefined;
+        const userInfo = response.wasSuccessful ? { userId: response.userID, username: response.username ?? username } : undefined;
+        if (!response.wasSuccessful) {
+            setLoginError(response.errorMessage);
+        }
         onLoginCompleted(response.wasSuccessful, userInfo);
 
         setIsLoading(false);
@@ -34,6 +40,9 @@ function LoginForm({ onLoginCompleted }) {
                         </div>
                         <div className="uk-section-small uk-section-muted uk-border-rounded">
                             <div className="uk-container">
+                                {
+                                    loginError && <div className="uk-align-center uk-text-danger uk-margin-bottom-small">{loginError}</div>
+                                }
                                 <form className="uk-form-stacked">
                                     <div className="uk-margin-small">
                                         <div className="uk-inline">
@@ -41,6 +50,7 @@ function LoginForm({ onLoginCompleted }) {
                                             <input className="uk-input uk-form-width-large"
                                                 type="text"
                                                 placeholder="Email Address"
+                                                value={username}
                                                 onChange={(event) => setUsername(event.target.value)} />
                                         </div>
                                     </div>
@@ -50,6 +60,7 @@ function LoginForm({ onLoginCompleted }) {
                                             <input className="uk-input uk-form-width-large"
                                                 type="password"
                                                 placeholder="Password"
+                                                value={password}
                                                 onChange={(event) => setPassword(event.target.value)} />
                                         </div>
                                     </div>
