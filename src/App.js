@@ -6,6 +6,8 @@ import Header from './components/Header';
 import LoginForm from './components/LoginForm.js';
 import 'react-toastify/dist/ReactToastify.css';
 import AuthService from "./services/auth.service.ts";
+import mainLogo from "./img/hand.png";
+import './site.css'
 
 function App(props) {
   const [isUserLoggedIn, setisUserLoggedIn] = useState(false);
@@ -25,10 +27,10 @@ function App(props) {
   }, []);
 
   return (      
-    <div className="uk-height-viewport">
+    <div className="uk-height-viewport"> 
       <Header
         left={
-            <a className="uk-navbar-item uk-logo" href="./">LOGO</a>
+          isUserLoggedIn && <a className="uk-navbar-item uk-logo" href="./"><img src={mainLogo} width="50" height="50"/></a>
         }
         right={
           isUserLoggedIn &&

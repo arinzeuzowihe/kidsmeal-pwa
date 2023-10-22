@@ -1,0 +1,41 @@
+// 1. Your custom variables and variable overwrites.
+$custom-primary-color: #57b846;
+$custom-white: #fff;
+$custom-text-font: 15px;
+$custom-border-radius: 15px;
+
+$button-primary-background: $custom-primary-color;
+$navbar-background: $custom-primary-color;
+$navbar-toggle-color: $custom-white;
+$navbar-toggle-hover-color: $custom-white;
+$navbar-item-color:$custom-white;
+$navbar-nav-item-font-size: $custom-text-font;
+$global-link-color: $custom-primary-color;
+$global-link-hover-color: $custom-primary-color;
+$subnav-pill-item-active-background: $custom-primary-color;
+
+// 2. Import default variables and available mixins.
+@import "uikit/src/scss/variables-theme.scss";
+@import "uikit/src/scss/mixins-theme.scss";
+
+// 3. Your custom mixin overwrites.
+@mixin hook-button(){
+    border-radius: $custom-border-radius;
+}
+
+@mixin hook-form(){
+    padding: 0 10px;
+    background: #fff;
+    color: #666;
+    border: 1px solid #e5e5e5;
+    transition: 0.2s ease-in-out;
+    transition-property: color, background-color, border;
+    border-radius: $custom-border-radius;
+}
+
+@mixin hook-subnav-pill-item() {
+    border-radius: $custom-border-radius;
+}
+
+// 4. Import UIkit.
+@import "uikit/src/scss/uikit-theme.scss";

@@ -57,8 +57,8 @@ function Home(props: any) {
     
     return (
         <div className="overflow-content" id="home-container">
-            <div className="uk-margin-small-top" uk-sticky="end: #home-container; offset: 80">
-                <ul className="uk-flex-center" uk-tab="connect: #home-tab-content; animation: uk-animation-slide-left-medium uk-animation-slide-right-medium">
+            <div className="uk-margin-medium-top" uk-sticky="end: #home-container; offset: 80">
+                <ul className="uk-subnav uk-subnav-pill uk-flex-center" uk-switcher="connect: #home-tab-content; animation: uk-animation-slide-left-medium uk-animation-slide-right-medium">
                     {
                         kids.map((kid, index) => {
                             if (index === 0) {

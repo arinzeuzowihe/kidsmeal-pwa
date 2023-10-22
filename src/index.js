@@ -13,6 +13,7 @@ import  store  from './redux/store'
 import { Provider } from 'react-redux';
 import MealSuggestionList from './components/MealSuggestionList';
 
+
 //https://reactrouter.com/en/main/start/tutorial
 const broswerRouter = createBrowserRouter([
   {

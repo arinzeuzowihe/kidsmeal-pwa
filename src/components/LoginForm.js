@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import AuthService from "../services/auth.service.ts";
 import Spinner from "./Spinner";
+import mainLogo from "../img/hand.png";
 
 
 function LoginForm({ onLoginCompleted }) {
@@ -35,10 +36,18 @@ function LoginForm({ onLoginCompleted }) {
                 isLoading
                     ? <Spinner ratio="5" text="Logging In..."/>
                     : <>
-                        <div className="uk-container uk-margin-small-bottom">
-                            <img className="uk-align-center uk-border-circle" width="250" height="250" uk-svg="true" alt="homepage icon" src="https://pbs.twimg.com/profile_images/1024304482207911937/VW4zbXw__400x400.jpg"/>
-                        </div>
                         <div className="uk-section-small uk-section-muted uk-border-rounded">
+                            <div className="uk-container uk-margin-medium-bottom">
+                                <div uk-grid="true">
+                                    <div className="uk-width-expand">
+                                    <h3>Welcome to Steady Spoon</h3>
+                                        Feed your kid with confidence and not fear!
+                                    </div>
+                                    <div className="uk-width-1-4">
+                                    <img src={mainLogo} alt="logo" width="50" height="50"/>
+                                    </div>
+                                </div>
+                            </div>
                             <div className="uk-container">
                                 {
                                     loginError && <div className="uk-align-center uk-text-danger uk-margin-bottom-small">{loginError}</div>
@@ -64,7 +73,7 @@ function LoginForm({ onLoginCompleted }) {
                                                 onChange={(event) => setPassword(event.target.value)} />
                                         </div>
                                     </div>
-                                    <div className="uk-margin-small">
+                                    <div className="uk-margin-small uk-margin-medium-top">
                                         <button className="uk-button uk-button-primary uk-width-expand"
                                             onClick={handleLoginAsync}>LOGIN</button>
                                     </div>
