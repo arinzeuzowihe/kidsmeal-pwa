@@ -13,6 +13,7 @@ $navbar-nav-item-font-size: $custom-text-font;
 $global-link-color: $custom-primary-color;
 $global-link-hover-color: $custom-primary-color;
 $subnav-pill-item-active-background: $custom-primary-color;
+$badge-background: $custom-primary-color;
 
 // 2. Import default variables and available mixins.
 @import "uikit/src/scss/variables-theme.scss";

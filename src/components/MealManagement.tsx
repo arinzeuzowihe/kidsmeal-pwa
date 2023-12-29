@@ -259,14 +259,14 @@ function MealManagement() {
 
     return (
         <div className="uk-position-center">
-            <div className="uk-card uk-card-default uk-width-xlarge">
+            <div className="uk-card uk-card-default uk-width-xlarge uk-margin-small-top">
                 <div className="uk-card-header">
                     <KidSelection kids={kids} onSelectionChange={handleKidSelectionChange}/>
                 </div>
                 <div className="uk-card-body">
                     <div className="uk-align-left">
                         {
-                            preferences.filter(p => p.isActive).map((preference: BasicMealPreference, index) => {
+                            preferences?.filter(p => p.isActive).map((preference: BasicMealPreference, index) => {
                                 return <a key={index} className={ selectedMealPrefrenceDetails?.mealId === preference.mealId ? `${badgeClasses} ${selectedBadgeClass}` : badgeClasses}>
                                             <span onClick={() => handleMealPreferenceSelection(preference)}>{preference.mealName}&nbsp;</span>
                                             <button onClick={() => handleRemoveMealPreference(preference)} type="button" aria-label="Close" uk-close="true">
@@ -275,7 +275,7 @@ function MealManagement() {
                             })
                         }
                         {
-                            preferences.filter(p => !p.isActive).map((preference: BasicMealPreference, index) => {
+                            preferences?.filter(p => !p.isActive).map((preference: BasicMealPreference, index) => {
                                 return <a key={index} className={ selectedMealPrefrenceDetails?.mealId === preference.mealId ? `${badgeClasses} ${inactiveBadgeClass} ${selectedBadgeClass}` : `${badgeClasses} ${inactiveBadgeClass}`}>
                                             <span onClick={() => handleMealPreferenceSelection(preference)}>{preference.mealName}&nbsp;</span>
                                         </a>

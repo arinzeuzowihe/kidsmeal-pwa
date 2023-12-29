@@ -70,3 +70,22 @@ self.addEventListener('message', (event) => {
 });
 
 // Any other custom service worker logic can go here.
+async function cacheFirstWithRefresh(request) {
+  
+  const fetchResponsePromise = fetch(request).then(async (response) => {
+    //console.log(request);
+    if (response.ok) {
+      const cache = await caches.open("KidsMealCache");
+      cache.put(request, response.clone());
+    }
+
+    return response;
+  });
+
+  return (await caches.match(request)) || (await fetchResponsePromise);
+
+}
+
+self.addEventListener("fetch", (event) => {
+  //cacheFirstWithRefresh(event.request);
+});
