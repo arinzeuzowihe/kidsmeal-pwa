@@ -18,7 +18,7 @@ function MealQuestionaire() {
     const navigate = useNavigate();
 
     const [selectedMealType, setSelectedMealType] = useState<MealType>();
-    const [includeTakeOut, setIncludeTakeOut] = useState<boolean>();
+    const [includeTakeOut, setIncludeTakeOut] = useState<boolean>(true);
     const [sameMealForAll, setSameMealForAll] = useState<boolean>(false);
     const [selectedKidIds, setSelectedKidIds] = useState<number[]>([]);
     const [pendingSuggestions, setPendingSuggestions] = useState<MealSuggestion[]>([]);
@@ -33,6 +33,19 @@ function MealQuestionaire() {
 
         fecthPendingSuggestions()
             .catch(console.error);
+        
+        const currentDateTime = new Date();
+        const currentHour = currentDateTime.getHours();
+        var defaultMealType = MealType.Snack;
+        if (currentHour >= 5 && currentHour <= 11) {
+            defaultMealType = MealType.Breakfast;
+        } else if (currentHour >= 12 && currentHour <= 3) {
+            defaultMealType = MealType.Lunch;
+        } else if (currentHour >= 5 && currentHour <= 9) {
+            defaultMealType = MealType.Dinner;
+        }
+
+        setSelectedMealType(defaultMealType);
 
     }, []);
     
@@ -117,7 +130,9 @@ function MealQuestionaire() {
                                                         className="uk-radio"
                                                         type="radio"
                                                         name="mealType"
-                                                        onClick={() => setSelectedMealType(mealTypeEnumValue)}/> {MealType[mealTypeEnumValue]}
+                                                            onClick={() => setSelectedMealType(mealTypeEnumValue)}
+                                                            checked={selectedMealType === mealTypeEnumValue}
+                                                        /> {MealType[mealTypeEnumValue]}
                                                 </label>
                                             </div>
                                             }
@@ -135,7 +150,8 @@ function MealQuestionaire() {
                                                 className="uk-radio"
                                                 type="radio"
                                                 name="takeout"
-                                                onClick={() => setIncludeTakeOut(true)}/> Yes
+                                                onClick={() => setIncludeTakeOut(true)}
+                                                checked={includeTakeOut}/> Yes
                                         </label>
                                     </div>
                                     <div className="uk-margin-small-bottom">
@@ -145,7 +161,8 @@ function MealQuestionaire() {
                                                     className="uk-radio"
                                                     type="radio"
                                                     name="takeout"
-                                                    onClick={() => setIncludeTakeOut(false)}/> No
+                                                onClick={() => setIncludeTakeOut(false)}
+                                                checked={!includeTakeOut}/> No
                                         </label>
                                     </div>
                                 </div>
