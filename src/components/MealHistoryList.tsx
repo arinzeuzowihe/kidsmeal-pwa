@@ -77,7 +77,7 @@ function MealHistoryList(props: MealHistoryListProps) {
             <li className="uk-open">
                 <a className="uk-accordion-title" href="./">Today</a>
                 <div className="uk-accordion-content">
-                    Sorry no history recorded yet.....
+                    Sorry no meal history has been recorded in the last 10 days.... 
                 </div>
             </li>
         </ul>

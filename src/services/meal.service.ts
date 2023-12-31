@@ -30,12 +30,11 @@ class MealService extends BaseService {
             daysFromToday: totalDays
         };
 
-        const reponse = await this.postAsync('/meal/history', request);
-        if (reponse) {
-            const historyDictionary: {[kidId: number]: MealHistory[]} = reponse.eatingHistory;
+        const response = await this.postAsync('/meal/history', request);
+        if (response) {
+            const historyDictionary: {[kidId: number]: MealHistory[]} = response.eatingHistory;
             return historyDictionary[kidId];
         }
-
         return [];
     }
 
