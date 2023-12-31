@@ -45,11 +45,12 @@ class MealService extends BaseService {
         return response.pendingSuggestions as MealSuggestion[];
     }
 
-    public async getMealSuggestionAsync(kidIds: number[], mealType: MealType, includeTakeOut: boolean): Promise<MealSuggestion[]> {
+    public async getMealSuggestionAsync(kidIds: number[], mealType: MealType, includeTakeOut: boolean, sameMealForAll: boolean): Promise<MealSuggestion[]> {
         const request: MealSuggestionRequest = {
             kidIds,
             mealType,
-            includeTakeOut
+            includeTakeOut,
+            sameMealForAll
         }
         const response = await this.postAsync('/meal/suggestion/generate', request);
         return response?.pendingSuggestions;

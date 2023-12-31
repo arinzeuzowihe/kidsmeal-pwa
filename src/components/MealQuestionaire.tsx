@@ -8,6 +8,7 @@ import { storeGeneratedSuggestions } from "../redux/slices/mealSuggestionSlice";
 import { useNavigate } from "react-router-dom";
 import { MealSuggestion } from "../interfaces/api/responses";
 import { ToastContainer, toast } from "react-toastify";
+import Switch from "react-switch";
 
 function MealQuestionaire() {
     const mealService = MealService.getInstance();
@@ -18,8 +19,10 @@ function MealQuestionaire() {
 
     const [selectedMealType, setSelectedMealType] = useState<MealType>();
     const [includeTakeOut, setIncludeTakeOut] = useState<boolean>();
+    const [sameMealForAll, setSameMealForAll] = useState<boolean>(false);
     const [selectedKidIds, setSelectedKidIds] = useState<number[]>([]);
     const [pendingSuggestions, setPendingSuggestions] = useState<MealSuggestion[]>([]);
+
 
     useEffect(() => {
 
@@ -51,7 +54,7 @@ function MealQuestionaire() {
             return;
         }
 
-        const response = await mealService.getMealSuggestionAsync(selectedKidIds, selectedMealType, includeTakeOut);
+        const response = await mealService.getMealSuggestionAsync(selectedKidIds, selectedMealType, includeTakeOut, sameMealForAll);
 
         if (!response || response.length == 0) {
             toast.info('Unable to find any suggestions. Try changing your criteria.');
@@ -61,14 +64,22 @@ function MealQuestionaire() {
         const params: MealSuggestionParams = {
             kidIds: selectedKidIds,
             mealType: selectedMealType,
-            includeTakeout: includeTakeOut
+            includeTakeout: includeTakeOut,
+            sameMealForAll
         }
         dispatch(storeGeneratedSuggestions({ params, suggestions: response }))
         navigate('/suggestions');
     }
 
     const onKidSelection = (selectedKidIds: number[]) => {
+        if (sameMealForAll && selectedKidIds.length <= 1) {
+            setSameMealForAll(false);
+        }
         setSelectedKidIds(selectedKidIds);
+    }
+
+    const onSameMealToggle = (value: boolean) => {
+        setSameMealForAll(value);
     }
 
     return (
@@ -89,7 +100,7 @@ function MealQuestionaire() {
                             <li>
                                 <div className="uk-text-large uk-text-bold">1. Who will be eating this next meal?</div>
                                 <div className="uk-margin uk-form-controls">
-                                    <KidSelection kids={kids} onSelectionChange={onKidSelection}/>
+                                    <KidSelection kids={kids} onSelectionChange={onKidSelection} />
                                 </div>
                             </li>
                             <li>
@@ -140,7 +151,19 @@ function MealQuestionaire() {
                                 </div>
                             </li>
                         </ul>
-                        <div className="uk-margin-medium">
+                        <div className="uk-align-right uk-margin-medium-bottom">
+                                        <label>
+                                            <span>Same meal for all kids</span>
+                                <Switch onChange={onSameMealToggle}
+                                    checked={sameMealForAll}
+                                    className="react-switch"
+                                    checkedIcon={false}
+                                    uncheckedIcon={false}
+                                    onColor="#57b846"
+                                    disabled={selectedKidIds.length <= 1}/>
+                                        </label>
+                                    </div>
+                        <div className="uk-margin-small-bottom">
                             <button
                                 type="button"
                                 className="uk-button uk-button-primary uk-width-expand"

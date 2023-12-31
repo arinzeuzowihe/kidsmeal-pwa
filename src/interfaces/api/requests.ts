@@ -27,7 +27,8 @@ export interface UpsertMealPreferenceRequest extends BaseMealPreferenceRequest {
 export interface MealSuggestionRequest {
     kidIds: number[],
     mealType: number,
-    includeTakeOut: boolean
+    includeTakeOut: boolean,
+    sameMealForAll: boolean
 }
 
 export interface SaveMealSuggestionRequest {

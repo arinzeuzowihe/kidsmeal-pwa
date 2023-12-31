@@ -176,11 +176,11 @@ function MealSuggestionList() {
 
         //Use props to re-execute api call
         const mealTypeEnumValue = Number(generationParams.mealType);
-        if (generationParams.mealType === undefined || isNaN(mealTypeEnumValue) || generationParams.includeTakeout === undefined || !kidIds || kidIds.length === 0) {
+        if (generationParams.mealType === undefined || isNaN(mealTypeEnumValue) || generationParams.includeTakeout === undefined || generationParams.sameMealForAll === undefined || !kidIds || kidIds.length === 0) {
             return;
         }
 
-        const response = await mealService.getMealSuggestionAsync(kidIds, generationParams.mealType, generationParams.includeTakeout);
+        const response = await mealService.getMealSuggestionAsync(kidIds, generationParams.mealType, generationParams.includeTakeout, generationParams.sameMealForAll);
         const updatedSuggestions = [...reviewableSuggestions.filter(s => !kidIds.includes(s.kidId)), ...response];  //Update local copy of suggestions in state
         dispatch(storeGeneratedSuggestions({suggestions: updatedSuggestions}));
     }
@@ -323,7 +323,7 @@ function MealSuggestionList() {
                 <div className="uk-card-body">
                     {
                         reviewableSuggestions.map((suggestion, index) => {
-                            return <article key={index} className="uk-comment uk-comment-primary" role="comment">
+                            return <article key={index} className="uk-comment uk-comment-primary uk-margin-small-bottom" role="comment">
                                 <header className="uk-comment-header">
                                     {
                                         isReviewInProgress && <div className="uk-align-right">

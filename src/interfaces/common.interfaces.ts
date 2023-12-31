@@ -14,5 +14,6 @@ export enum MealType {
 export interface MealSuggestionParams {
     kidIds: number[],
     mealType?: MealType,
-    includeTakeout?: boolean
+    includeTakeout?: boolean,
+    sameMealForAll?: boolean
 }

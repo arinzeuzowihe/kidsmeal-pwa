@@ -14,7 +14,8 @@ const initialState: MealSuggestionState = {
     params: {
         kidIds: [],
         mealType: undefined,
-        includeTakeout: undefined
+        includeTakeout: undefined,
+        sameMealForAll: undefined
     },
     suggestions: []
 }
