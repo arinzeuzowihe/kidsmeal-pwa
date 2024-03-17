@@ -9,7 +9,6 @@ import UserService from "../services/user.service";
 import { useNavigate } from "react-router-dom";
 import { useAppDispatch } from "../hooks/reduxHooks";
 import { storeGeneratedSuggestions } from "../redux/slices/mealSuggestionSlice";
-import { toast } from "react-toastify";
 
 function Home(props: any) {
     const [isLoading, setIsLoading] = useState(false);
@@ -61,11 +60,12 @@ function Home(props: any) {
                 <ul className="uk-subnav uk-subnav-pill uk-flex-center" uk-switcher="connect: #home-tab-content; animation: uk-animation-slide-left-medium uk-animation-slide-right-medium">
                     {
                         kids.map((kid, index) => {
+                            const fallbackProfilePic = require('../img/default-kid-pic.png');
                             if (index === 0) {
-                                return <li key={index} onClick={() => setSelectedKidId(kid.id)} className="uk-width-medium uk-active"><a href="./"><img className="uk-border-circle" src="https://styles.redditmedia.com/t5_2sws5/styles/communityIcon_shz4ogqfbtw81.png" width="50" height="50" alt="" />{kid.name }</a></li>
+                                return <li key={index} onClick={() => setSelectedKidId(kid.id)} className="uk-width-medium uk-active"><a href="./"><img className="uk-border-circle" src={kid.profilePicUrl ?? fallbackProfilePic} width="65" height="65" alt="kid profile pic" />{kid.name }</a></li>
                             }
                             else {
-                                return <li key={index} onClick={() => setSelectedKidId(kid.id)} className="uk-width-medium" ><a href="./"><img className="uk-border-circle" src="https://styles.redditmedia.com/t5_2sws5/styles/communityIcon_shz4ogqfbtw81.png" width="50" height="50" alt="" />{kid.name }</a></li>
+                                return <li key={index} onClick={() => setSelectedKidId(kid.id)} className="uk-width-medium" ><a href="./"><img className="uk-border-circle" src={kid.profilePicUrl ?? fallbackProfilePic} width="65" height="65" alt="kid profile pic" />{kid.name }</a></li>
                             }
 
                         })

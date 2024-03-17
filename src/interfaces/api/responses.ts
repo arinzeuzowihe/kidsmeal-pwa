@@ -5,7 +5,8 @@ export interface BaseUser {
 
 export interface BaseKid {
     id: number,
-    name: string
+    name: string,
+    profilePicUrl: string
 };
 
 export interface BaseMeal {
@@ -53,5 +54,6 @@ export interface DetailedMealPreference {
 // TODO: Replace Kid type with BaseKid contract
 type Kid = {
     kidID: number,
-    name: string
+    name: string,
+    profilePicUrl: string
 }

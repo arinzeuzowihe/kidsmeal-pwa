@@ -24,6 +24,9 @@ class UserService extends BaseService{
         return this.currentKids;
     }
 
+    public getKid(kidId: number): BaseKid | undefined {
+        return this.currentKids.find(k => k.id === kidId);
+    }
 }
 
 export default UserService;

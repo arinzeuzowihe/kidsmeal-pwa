@@ -9,6 +9,7 @@ import { ToastContainer, toast } from "react-toastify"
 import { useAppDispatch, useAppSelector } from "../hooks/reduxHooks";
 import { clearStoredSuggestions, storeGeneratedSuggestions } from "../redux/slices/mealSuggestionSlice";
 import { MealSuggestionReview } from "../interfaces/api/requests";
+import UserService from "../services/user.service";
 
 interface AlternateMeal extends BasicMealPreference {
     mealDescription: string;
@@ -22,6 +23,7 @@ interface ReviewableMealSuggestion extends MealSuggestion {
 
 function MealSuggestionList() {
     const mealService = MealService.getInstance();
+    const userService = UserService.getInstance();
     const storedSuggestions = useAppSelector((state) => state.mealSuggestion.suggestions);
     const generationParams = useAppSelector((state) => state.mealSuggestion.params);
     const dispatch = useAppDispatch();
@@ -322,7 +324,9 @@ function MealSuggestionList() {
                 </div>
                 <div className="uk-card-body">
                     {
-                        reviewableSuggestions.map((suggestion, index) => {
+                            reviewableSuggestions.map((suggestion, index) => {
+                                const fallbackProfilePic = require('../img/default-kid-pic.png');
+                                const kid = userService.getKid(suggestion.kidId);
                             return <article key={index} className="uk-comment uk-comment-primary uk-margin-small-bottom" role="comment">
                                 <header className="uk-comment-header">
                                     {
@@ -346,7 +350,7 @@ function MealSuggestionList() {
                                     }
                                     <div className="uk-grid-medium uk-flex-middle" uk-grid="true">
                                         <div className="uk-width-auto">
-                                            <img className="uk-border-circle" src="https://styles.redditmedia.com/t5_2sws5/styles/communityIcon_shz4ogqfbtw81.png" width="50" height="50" alt="" />
+                                            <img className="uk-border-circle" src={ kid?.profilePicUrl ?? fallbackProfilePic} width="65" height="65" alt="kid profile pic" />
                                         </div>
                                         <div className="uk-width-expand">
                                             <h4 className="uk-comment-title uk-margin-remove">
