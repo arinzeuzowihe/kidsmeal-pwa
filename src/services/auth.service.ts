@@ -68,15 +68,16 @@ class AuthService extends BaseService {
         return { userID, username, wasSuccessful, kids: [], errorMessage};
     }
 
+
     /**
      * Performs a logout request
      */
     public async logoutAsync() {
         
         try {
-            
-            await this.getAsync(`/logout/${this.currentUserID}`)  
-
+                
+            await this.getAsync(`/logout/${this.currentUserID}`)
+    
         } catch (error) {
             console.error(`Error: ${error}`);
         }
@@ -84,7 +85,7 @@ class AuthService extends BaseService {
             //remove access token and refresh token from local storage
             localStorage.removeItem('user_info');
             localStorage.removeItem('access_token');
-            localStorage.removeItem('refresh_token'); 
+            localStorage.removeItem('refresh_token');
             localStorage.removeItem('kids');
         }
     }

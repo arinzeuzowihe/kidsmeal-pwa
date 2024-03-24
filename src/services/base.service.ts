@@ -1,8 +1,9 @@
 import { BaseKid, BaseUser } from "../interfaces/api/responses";
+import { ToastContainer, toast } from "react-toastify";
 
 const apiBaseUrl = "https://localhost:7136"
 
-class BaseService{
+class BaseService {
 
     protected get accessToken() {
         return localStorage.getItem('access_token') ?? '';
@@ -10,8 +11,8 @@ class BaseService{
 
     protected set accessToken(value: string) {
         if (value) {
-            localStorage.setItem('access_token', value);   
-        }        
+            localStorage.setItem('access_token', value);
+        }
     }
 
     protected get refreshToken() {
@@ -20,14 +21,14 @@ class BaseService{
 
     protected set refreshToken(value: string) {
         if (value) {
-            localStorage.setItem('refresh_token', value);   
+            localStorage.setItem('refresh_token', value);
         }
     }
 
     protected get currentUserID(): number {
         const userinfo = localStorage.getItem('user_info');
         if (!userinfo)
-            throw new Error('Unable to retrieve user info.');
+            return 0;  // throw new Error('Unable to retrieve user info.');
 
         const parsedUserInfo = JSON.parse(userinfo);
         return parsedUserInfo?.userID ?? 0;
@@ -36,7 +37,7 @@ class BaseService{
     protected get currentKids(): BaseKid[] {
         const kids = localStorage.getItem('kids');
         if (!kids)
-            throw new Error('Unable to retrieve any kid details.');
+            return []; //throw new Error('Unable to retrieve any kid details.');
         
         const parsedKids: BaseKid[] = JSON.parse(kids);
         return parsedKids;
@@ -103,7 +104,7 @@ class BaseService{
                 //get updated access token using  refresh token
                 headers = new Headers();
                 headers.append('Content-Type', 'application/json');
-                const tokens = { accessToken: this.accessToken , refreshToken: this.refreshToken };
+                const tokens = { accessToken: this.accessToken, refreshToken: this.refreshToken };
                 const tokenRefreshResponse = await fetch(`${apiBaseUrl}/token/refresh`, {
                     method: "POST",
                     mode: 'cors',
@@ -122,8 +123,16 @@ class BaseService{
                     return await this.fetchAsync(urlFragment, method, requiresAuthorization, data, true);
 
                 } else {
+                    //throw new Error("Unable to refresh token.");
+                    //remove access token and refresh token from local storage
+                    localStorage.removeItem('user_info');
+                    localStorage.removeItem('access_token');
+                    localStorage.removeItem('refresh_token');
+                    localStorage.removeItem('kids');
+                    
+                    toast.warn('Session has timed out. Please log in again.');
 
-                    throw new Error("Unable to refresh token.");       
+                    window.location.href = "/";
                 }
 
             }
@@ -133,7 +142,7 @@ class BaseService{
             }
 
             if (response.status === 200) {
-                return response.json(); 
+                return response.json();
             }
             
             return response;
