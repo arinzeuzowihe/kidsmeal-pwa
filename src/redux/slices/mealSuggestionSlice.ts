@@ -30,7 +30,7 @@ export const mealSuggestionSlice = createSlice({
                 state.params = action.payload.params;
             }
 
-            state.suggestions = action.payload.suggestions;
+            state.suggestions = action.payload.suggestions.sort((a, b) => { return a.kidId - b.kidId });
         },
         clearStoredSuggestions: (state) => {
             state = initialState;
