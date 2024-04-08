@@ -69,23 +69,67 @@ self.addEventListener('message', (event) => {
   }
 });
 
+async function cachefirst(request) {
+  const cachedResponse = await caches.match(request);
+  if (cachedResponse) {
+    return cachedResponse;
+  }
+
+  try {
+    const networkResponse = await fetch(request);
+    if (networkResponse) {
+      const cache = await caches.open("KidsMealCache");
+      cache.put(request, networkResponse.clone());
+      return networkResponse;
+    }
+  } catch (error) {
+    return Response.error();
+  }
+}
+
 // Any other custom service worker logic can go here.
 async function cacheFirstWithRefresh(request) {
-  
-  const fetchResponsePromise = fetch(request).then(async (response) => {
-    //console.log(request);
-    if (response.ok) {
+  const fetchResponsePromise = fetch(request).then(async (networkResponse) => {
+    if (networkResponse.ok) {
       const cache = await caches.open("KidsMealCache");
-      cache.put(request, response.clone());
+      cache.put(request, networkResponse.clone());
     }
-
-    return response;
+    return networkResponse;
   });
 
   return (await caches.match(request)) || (await fetchResponsePromise);
+}
 
+async function networkFirst(request) {
+  try {
+    const networkResponse = await fetch(request);
+    if (networkResponse.ok) {
+      const cache = await caches.open("KidsMealCache");
+      cache.put(request, networkResponse);
+    }
+    return networkResponse;
+  } catch (error) {
+    const cachedResponse = await caches.match(request);
+    return cachedResponse || Response.error();
+  }
 }
 
 self.addEventListener("fetch", (event) => {
-  //cacheFirstWithRefresh(event.request);
+  //console.log(event.request);  
+
+  // Please note: without the .respondWith the request is sent to the network as if the service worker was not installed
+  // https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Guides/Caching
+  event.respondWith(cacheFirstWithRefresh(event.request));
+});
+
+self.addEventListener("activate", (event) => {
+  const cachesToClear = ["KidsMealCache"];
+
+  event.waitUntil(
+    caches.forEach((cache, cacheName) => {
+      if (cachesToClear.includes(cacheName)) {
+        caches.delete(cacheName);
+      }
+    })
+  )
 });
