@@ -1,7 +1,7 @@
 import { BaseKid, BaseUser } from "../interfaces/api/responses";
 import { ToastContainer, toast } from "react-toastify";
 
-const apiBaseUrl = process.env.BASE_API_URL // "https://localhost:7136"
+const apiBaseUrl = process.env.REACT_APP_BASE_API_URL // "https://localhost:7136"
 
 class BaseService {
 
