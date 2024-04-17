@@ -1,7 +1,7 @@
 import { BaseKid, BaseUser } from "../interfaces/api/responses";
 import { ToastContainer, toast } from "react-toastify";
 
-const apiBaseUrl = (process.env.NODE_ENV === 'production') ? process.env.BASE_API_URL : "https://localhost:7136"
+const apiBaseUrl = process.env.BASE_API_URL // "https://localhost:7136"
 
 class BaseService {
 
@@ -86,6 +86,7 @@ class BaseService {
                 headers.append('Authorization', this.getAuthorizationHeader());
             }
             
+            console.log(apiBaseUrl);
             var response = await fetch(`${apiBaseUrl}${urlFragment}`, {
                 method,
                 mode: 'cors',
