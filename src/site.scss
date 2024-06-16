@@ -1,4 +1,4 @@
-// 1. Your custom variables and variable overwrites.
+// 1. Your custom variables and variable overwrites of the varibales in ~/uikit/src/scss/variables.scss.
 $custom-primary-color: #57b846;
 $custom-white: #fff;
 $custom-text-font: 15px;
@@ -14,6 +14,8 @@ $global-link-color: $custom-primary-color;
 $global-link-hover-color: $custom-primary-color;
 $subnav-pill-item-active-background: $custom-primary-color;
 $badge-background: $custom-primary-color;
+$offcanvas-bar-background: $custom-white;
+$overlay-primary-color-mode: $custom-primary-color;
 
 // 2. Import default variables and available mixins.
 @import "uikit/src/scss/variables-theme.scss";
@@ -36,6 +38,18 @@ $badge-background: $custom-primary-color;
 
 @mixin hook-subnav-pill-item() {
     border-radius: $custom-border-radius;
+}
+
+@mixin hook-inverse-nav-default-item() {
+    color: $custom-white
+}
+
+@mixin hook-inverse-nav-default-item-active() {
+    color: red;
+}
+
+@mixin hook-offcanvas-bar(){
+    background: #57b846;
 }
 
 // 4. Import UIkit.

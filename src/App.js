@@ -26,30 +26,40 @@ function App(props) {
     }
   }, []);
 
-  return (      
-    <div className="uk-height-viewport"> 
-      <Header
-        left={
-          isUserLoggedIn && <a className="uk-navbar-item uk-logo" href="./"><img src={mainLogo} width="50" height="50"/></a>
-        }
-        right={
-          isUserLoggedIn &&
-          <>
-            <div className="uk-navbar-item"> Howdy {username},</div>
-            <HamburgerMenu onLogoutCompleted={() => updateLoginStatus(false, undefined)} /> 
-          </>
-        }
-      />
+  const leftNavBarContent = () => {
+    return <>
+      <HamburgerMenu onLogoutCompleted={() => updateLoginStatus(false, undefined)} />
+    </>
+  };
+
+  const centerNavBarContent = () => {
+    return <a className="uk-navbar-item uk-logo" href="./"><img src={mainLogo} width="50" height="50" /></a>
+  }
+
+  const rightNavBarContent = () => {
+    return <div className="uk-navbar-item uk-text-large"> Hi {username}</div>
+  }
+
+  return (
+    <div className="uk-height-viewport">
       {
-        !isUserLoggedIn
-          ? <LoginForm onLoginCompleted={updateLoginStatus}/> 
-          : <div uk-grid="true">
-              <div className="uk-width-1-6"></div>
-              <div className="uk-width-expand">
-                <Outlet />
-              </div>
-              <div className="uk-width-1-6"></div>
+        isUserLoggedIn && <>
+          <Header
+            left={rightNavBarContent()}
+            center={centerNavBarContent()}
+            right={leftNavBarContent()}
+          />
+          <div uk-grid="true">
+            <div className="uk-width-1-6"></div>
+            <div className="uk-width-expand">
+              <Outlet />
             </div>
+            <div className="uk-width-1-6"></div>
+          </div>
+        </>
+      }      
+      {
+        !isUserLoggedIn && <LoginForm onLoginCompleted={updateLoginStatus} />
       }
     </div>
   );

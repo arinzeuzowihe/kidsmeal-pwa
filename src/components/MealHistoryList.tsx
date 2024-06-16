@@ -1,34 +1,31 @@
 import React, { useEffect, useState } from "react";
 import './MealHistoryList.css';
-import MealHistoryEntry from './MealHistoryEntry'
 import MealService from "../services/meal.service";
-import { MealHistory } from "../interfaces/api/responses";
+import { BaseKid, MealHistory } from "../interfaces/api/responses";
 import Spinner from "./Spinner";
-import { groupBy } from "../functions/helper.functions";
+import UserService from "../services/user.service";
 
 interface MealHistoryListProps {
-    kidID: number;
-
     refreshData?: boolean;
 }
 
 function MealHistoryList(props: MealHistoryListProps) {
-
-    const [groupedHistories, setGroupedHistories] = useState < {[mealDate:string]: MealHistory[]} | undefined >(undefined);
-    const [isLoading, setIsLoading] = useState<boolean>(false);
     const mealService = MealService.getInstance();
+    const userService = UserService.getInstance();
+    const [mealHistoryEntries, setMealHistoryEntries] = useState<MealHistory[] | undefined>(undefined);
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+    const fallbackProfilePic = require('../img/default-kid-pic.png');
+    const kids: BaseKid[] = userService.getKids();
 
     useEffect(() => {
-        if (!props.kidID)
+        if (kids.length < 1)
             return;
-        
+
         const fetchMealHistory = async () => {
             setIsLoading(true);
-            const recentMealHistories = await mealService.getMealHistoryAsync(props.kidID);
-            if (recentMealHistories.length > 0) {
-                const mealsGroupedByDate = groupBy(recentMealHistories, 'eatenOn');                
-                setGroupedHistories(mealsGroupedByDate);
-            }
+            const testKidId = kids[0].id
+            const recentMealHistories = await mealService.getMealHistoryAsync(testKidId);
+            setMealHistoryEntries(recentMealHistories);
         };
 
         fetchMealHistory()
@@ -39,49 +36,45 @@ function MealHistoryList(props: MealHistoryListProps) {
                 setIsLoading(false);
             });
 
-    }, [props.refreshData]);
+    }, [props?.refreshData]);
 
     if (isLoading) {
-        return <Spinner ratio="5" text="Loading...."/>
+        return <Spinner ratio="5" text="Loading...." />
     }
-
-    if (groupedHistories) {
+    else if (mealHistoryEntries && mealHistoryEntries.length > 0) {
         return (
-            <ul className="uk-list uk-list-striped uk-list-large" uk-accordion="true">
-                {
-                    Object.keys(groupedHistories).map((key, index) => {
-                        const mealDate = new Date(key);
-                                if (index === 0) {
-                                    return <li key={index} className="uk-open">
-                                        <a className="uk-accordion-title" href="./">{ mealDate.toDateString()}</a>
-                                        <div className="uk-accordion-content">
-                                            <MealHistoryEntry histories={groupedHistories[key]}/>
-                                        </div>
-                                    </li>
-                                }
-    
-                                return <li key={index}>
-                                    <a className="uk-accordion-title" href="./">{ mealDate.toDateString()}</a>
-                                    <div className="uk-accordion-content">
-                                        <MealHistoryEntry histories={groupedHistories[key]}/>
-                                    </div>
-                                </li>
-                            })
+            <table className="uk-table uk-table-small uk-table-striped">
+                <thead>
+                    <tr>
+                        <th colSpan={3}></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {
+                        mealHistoryEntries?.map((entry, index) => {
+                            const mealDate = new Date(entry.eatenOn);
+                            const kid = kids.find(k => k.id === entry.kidID);
+                            return (<tr key={index}>
+                                <td><img className="uk-border-circle uk-preserve-width" src={kid?.profilePicUrl ?? fallbackProfilePic} width="40" height="40" alt="kid profile pic" /></td>
+                                <td> {entry.mealType} : {entry.mealName}</td>
+                                <td>{mealDate.toDateString()}</td>
+                            </tr>)
+                        })
                     }
-                </ul>
+                </tbody>
+                <caption>Last 7 days of activity</caption>
+            </table>
+        );
+    } else {
+        return (
+            <div className="uk-card  uk-card-default uk-card-body uk-text-center">
+                <div className="uk-margin-bottom-remove"><span className="uk-icon" uk-icon="icon: plus-circle; ratio: 2"></span></div>
+                <h2 className="uk-margin-small">No Meal History</h2>
+                <div>Sorry no meal history has been recorded for any kiddos yet.</div>
+            
+            </div>
         );
     }
-
-    return (
-        <ul className="uk-list uk-list-striped uk-list-large" uk-accordion="true">
-            <li className="uk-open">
-                <a className="uk-accordion-title" href="./">Today</a>
-                <div className="uk-accordion-content">
-                    Sorry no meal history has been recorded in the last 10 days.... 
-                </div>
-            </li>
-        </ul>
-    );
 }
 
 export default MealHistoryList;

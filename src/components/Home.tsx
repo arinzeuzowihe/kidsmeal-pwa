@@ -2,23 +2,20 @@ import { useEffect, useState } from "react";
 import MealHistoryList from "./MealHistoryList";
 import './Home.css'
 import MealService from "../services/meal.service";
-import MealSuggestionList from "./MealSuggestionList";
 import { BaseKid, MealSuggestion } from "../interfaces/api/responses";
 import Spinner from "./Spinner";
-import UserService from "../services/user.service";
 import { useNavigate } from "react-router-dom";
 import { useAppDispatch } from "../hooks/reduxHooks";
 import { storeGeneratedSuggestions } from "../redux/slices/mealSuggestionSlice";
 
 function Home(props: any) {
     const [isLoading, setIsLoading] = useState(false);
+    const [loadHistory, setLoadHistory] = useState(false);
     const [pendingSuggestions, setPendingSuggestions] = useState<MealSuggestion[]>([]);
-    const [kids, setKids] = useState<BaseKid[]>([]);
     const mealService = MealService.getInstance();
-    const userService = UserService.getInstance();
-    const [selectedKidId, setSelectedKidId] = useState<number>(0);
     const navigate = useNavigate();
     const dispatch = useAppDispatch();
+    const fallbackProfilePic = require('../img/default-kid-pic.png');
 
     useEffect(() => {
 
@@ -37,6 +34,8 @@ function Home(props: any) {
     }, []);
     
     useEffect(() => {
+        // if pending suggesstions found, navigate to the suggestions UI to collect feedback 
+        // otherwise do nothing so meal history list can load on its own.
         const hasPendingSuggestions = pendingSuggestions && pendingSuggestions.length > 0;
         if (hasPendingSuggestions) {
             
@@ -46,41 +45,18 @@ function Home(props: any) {
             return;
         }
 
-        setKids(() => userService.getKids());
-
+        setLoadHistory(true);
     }, [pendingSuggestions])
     
     if (isLoading) {
-        return <Spinner ratio="5" text="Loading...."/>
+        return <Spinner ratio="5" text="Loading...." />
     }
     
     return (
-        <div className="overflow-content" id="home-container">
-            <div className="uk-margin-medium-top" uk-sticky="end: #home-container; offset: 80">
-                <ul className="uk-subnav uk-subnav-pill uk-flex-center" uk-switcher="connect: #home-tab-content; animation: uk-animation-slide-left-medium uk-animation-slide-right-medium">
-                    {
-                        kids.map((kid, index) => {
-                            const fallbackProfilePic = require('../img/default-kid-pic.png');
-                            if (index === 0) {
-                                return <li key={index} onClick={() => setSelectedKidId(kid.id)} className="uk-width-medium uk-active"><a href="./"><img className="uk-border-circle" src={kid.profilePicUrl ?? fallbackProfilePic} width="65" height="65" alt="kid profile pic" />{kid.name }</a></li>
-                            }
-                            else {
-                                return <li key={index} onClick={() => setSelectedKidId(kid.id)} className="uk-width-medium" ><a href="./"><img className="uk-border-circle" src={kid.profilePicUrl ?? fallbackProfilePic} width="65" height="65" alt="kid profile pic" />{kid.name }</a></li>
-                            }
-
-                        })
-                    }
-                </ul>
+        <div className="overflow-content">
+            <div className="uk-margin-top">
+                <MealHistoryList/>
             </div>
-            <ul id="home-tab-content" className="uk-switcher uk-margin">
-                {
-                    kids.map((kid, index) => (
-                    <li key={index}>
-                        <MealHistoryList kidID={kid.id} refreshData={ selectedKidId === kid.id } />
-                    </li>
-                    ))
-                }
-            </ul>
         </div>
     );
 }

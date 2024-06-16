@@ -24,4 +24,5 @@ function MealHistoryEntry(props: MealHistoryEntryProp) {
     );
 }
 
+
 export default MealHistoryEntry;
