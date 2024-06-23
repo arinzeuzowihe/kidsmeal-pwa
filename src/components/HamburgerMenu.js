@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Header from '../components/Header';
 import AuthService from "../services/auth.service.ts";
@@ -8,12 +8,20 @@ function HamburgerMenu({ onLogoutCompleted }) {
     const userService = UserService.getInstance();
     const authService = AuthService.getInstance();
     const userId = userService.getUserID();
+    const [currentUserInfo, setCurrentUserInfo] = useState();
+
+    useEffect(() => {
+        const userInfo = authService.getCurrentLoggedInUser();
+        if (userInfo) {
+            setCurrentUserInfo(userInfo);
+        }
+      }, []);
 
     const handleLogout = () => {
         authService.logoutAsync();
         onLogoutCompleted();
     }
-
+    
     return (
         <div>
             <a className="uk-navbar-toggle" uk-navbar-toggle-icon="true" href="" uk-toggle="target: #offcanvas-main"></a>
@@ -21,7 +29,7 @@ function HamburgerMenu({ onLogoutCompleted }) {
                 <div className="uk-offcanvas-bar">
                     <button className="uk-offcanvas-close" type="button" uk-close="true"></button>
                     <div>
-                        <h1>Menu</h1>
+                        <h2>Hi {currentUserInfo?.username}</h2>
                     </div>
                     <div>
                         <ul className="uk-nav uk-nav-default">

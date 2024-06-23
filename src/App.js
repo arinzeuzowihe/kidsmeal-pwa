@@ -11,24 +11,18 @@ import './site.css'
 
 function App(props) {
   const [isUserLoggedIn, setisUserLoggedIn] = useState(false);
-  const [username, setUsername] = useState('');
   const authService = AuthService.getInstance();
   
-  const updateLoginStatus = (isLoggedIn, userInfo) => {
-    setUsername(userInfo?.username ?? '');
-    setisUserLoggedIn(isLoggedIn);
-  };
-
   useEffect(() => {
     const userInfo = authService.getCurrentLoggedInUser();
     if (userInfo) {
-      updateLoginStatus(true, userInfo);
+      setisUserLoggedIn(true);
     }
   }, []);
 
   const leftNavBarContent = () => {
     return <>
-      <HamburgerMenu onLogoutCompleted={() => updateLoginStatus(false, undefined)} />
+      <HamburgerMenu onLogoutCompleted={() => setisUserLoggedIn(false)} />
     </>
   };
 
@@ -36,30 +30,25 @@ function App(props) {
     return <a className="uk-navbar-item uk-logo" href="./"><img src={mainLogo} width="50" height="50" /></a>
   }
 
-  const rightNavBarContent = () => {
-    return <div className="uk-navbar-item uk-text-large"> Hi {username}</div>
-  }
-
   return (
     <div className="uk-height-viewport">
       {
         isUserLoggedIn && <>
           <Header
-            left={rightNavBarContent()}
             center={centerNavBarContent()}
             right={leftNavBarContent()}
           />
           <div uk-grid="true">
-            <div className="uk-width-1-6"></div>
+            <div className="uk-width-1-6 uk-visible@m"></div>
             <div className="uk-width-expand">
               <Outlet />
             </div>
-            <div className="uk-width-1-6"></div>
+            <div className="uk-width-1-6 uk-visible@m"></div>
           </div>
         </>
       }      
       {
-        !isUserLoggedIn && <LoginForm onLoginCompleted={updateLoginStatus} />
+        !isUserLoggedIn && <LoginForm onLoginCompleted={() => setisUserLoggedIn(true)} />
       }
     </div>
   );
