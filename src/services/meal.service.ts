@@ -24,16 +24,18 @@ class MealService extends BaseService {
         return await this.getAsync(`/meal/${mealId}`);
     }
 
-    async getMealHistoryAsync(kidId: number, totalDays?: number): Promise<MealHistory[]> {
+    async getMealHistoryAsync(kidId?: number, totalDays?: number): Promise<MealHistory[]> {
+        const allKidIds = this.currentKids.map((kid) => {
+            return kid.id;
+        });
         const request: MealHistoryRequest = {
-            kidIds: [kidId],
+            kidIds: (kidId) ? [kidId] : allKidIds,
             daysFromToday: totalDays
         };
 
         const response = await this.postAsync('/meal/history', request);
         if (response) {
-            const historyDictionary: {[kidId: number]: MealHistory[]} = response.eatingHistory;
-            return historyDictionary[kidId];
+            return response;
         }
         return [];
     }

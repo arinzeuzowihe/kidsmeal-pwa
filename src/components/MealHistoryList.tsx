@@ -23,8 +23,7 @@ function MealHistoryList(props: MealHistoryListProps) {
 
         const fetchMealHistory = async () => {
             setIsLoading(true);
-            const testKidId = kids[0].id
-            const recentMealHistories = await mealService.getMealHistoryAsync(testKidId);
+            const recentMealHistories = await mealService.getMealHistoryAsync();
             setMealHistoryEntries(recentMealHistories);
         };
 
@@ -62,7 +61,7 @@ function MealHistoryList(props: MealHistoryListProps) {
                         })
                     }
                 </tbody>
-                <caption>Last 7 days of activity</caption>
+                <caption>Last 30 days of activity</caption>
             </table>
         );
     } else {
