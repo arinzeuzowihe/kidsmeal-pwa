@@ -27,7 +27,7 @@ function App(props) {
   };
 
   const centerNavBarContent = () => {
-    return <a className="uk-navbar-item uk-logo" href="./"><img src={mainLogo} width="50" height="50" /></a>
+    return <a className="uk-navbar-item uk-logo" href="/"><img src={mainLogo} width="50" height="50" /></a>
   }
 
   return (

@@ -53,7 +53,7 @@ function Home(props: any) {
     }
     
     return (
-        <div className="overflow-content">
+        <div>
             <div className="uk-margin-top">
                 <MealHistoryList/>
             </div>

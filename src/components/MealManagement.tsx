@@ -7,6 +7,7 @@ import { MealType, SelectOptions } from "../interfaces/common.interfaces";
 import Switch from "react-switch";
 import './MealManagement.css';
 import KidSelection from "./KidSelection";
+import { useMediaQuery } from 'react-responsive'
 
 function MealManagement() {
     const mealService = MealService.getInstance();
@@ -258,7 +259,7 @@ function MealManagement() {
     };
 
     return (
-        <div className="uk-position-center">
+        <div className={ useMediaQuery({ query: '(min-width: 768px)'}) ? "uk-position-center" : "" }>
             <div className="uk-card uk-card-default uk-width-xlarge uk-margin-small-top">
                 <div className="uk-card-header">
                     <KidSelection kids={kids} onSelectionChange={handleKidSelectionChange}/>
