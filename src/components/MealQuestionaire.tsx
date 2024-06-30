@@ -9,6 +9,7 @@ import { useNavigate } from "react-router-dom";
 import { MealSuggestion } from "../interfaces/api/responses";
 import { ToastContainer, toast } from "react-toastify";
 import Switch from "react-switch";
+import { useMediaQuery } from 'react-responsive';
 
 function MealQuestionaire() {
     const mealService = MealService.getInstance();
@@ -22,6 +23,8 @@ function MealQuestionaire() {
     const [sameMealForAll, setSameMealForAll] = useState<boolean>(false);
     const [selectedKidIds, setSelectedKidIds] = useState<number[]>([]);
     const [pendingSuggestions, setPendingSuggestions] = useState<MealSuggestion[]>([]);
+    const mobileCss = "uk-section-small uk-section-muted uk-border-rounded";
+    const mainCss = mobileCss + " uk-position-center"
 
 
     useEffect(() => {
@@ -106,7 +109,7 @@ function MealQuestionaire() {
                             pauseOnFocusLoss
                             draggable
                             pauseOnHover/>
-            <div className="uk-section-small uk-section-muted uk-border-rounded uk-position-center">
+            <div className={useMediaQuery({ query: '(min-width: 768px)'}) ? mainCss : mobileCss }>
                 <div className="uk-container">
                     <form className="uk-form uk-width-large">
                         <ul className="uk-list uk-list-large uk-list-divider">

@@ -60,7 +60,7 @@ function KidSelection(props: KidSelectionProps) {
 
     const loadKidSelectionOptions = (kids: BaseKid[]) => {
     
-        let selectOptions: SelectOptions[] = [{ value: '0', text: '--Choose an option--', disabled: true }];
+        let selectOptions: SelectOptions[] = [{ value: '0', text: '--Choose a kid--', disabled: true }];
         if (!kids || kids.length === 0) {
             setKidSelectionOptions([...selectOptions]);
             return;

@@ -7,7 +7,7 @@ import { MealType, SelectOptions } from "../interfaces/common.interfaces";
 import Switch from "react-switch";
 import './MealManagement.css';
 import KidSelection from "./KidSelection";
-import { useMediaQuery } from 'react-responsive'
+import { useMediaQuery } from 'react-responsive';
 
 function MealManagement() {
     const mealService = MealService.getInstance();
