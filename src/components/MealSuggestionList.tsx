@@ -5,7 +5,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { MealType } from "../interfaces/common.interfaces";
 import MealService from "../services/meal.service";
 import { useNavigate } from "react-router-dom";
-import { ToastContainer, toast } from "react-toastify"
+import { ToastContainer, collapseToast, toast } from "react-toastify"
 import { useAppDispatch, useAppSelector } from "../hooks/reduxHooks";
 import { clearStoredSuggestions, storeGeneratedSuggestions } from "../redux/slices/mealSuggestionSlice";
 import { MealSuggestionReview } from "../interfaces/api/requests";
@@ -31,7 +31,7 @@ function MealSuggestionList() {
 
     const [isReviewInProgress, setIsReviewInProgress] = React.useState<boolean>();
     const [suggestionsToRetry, setsuggestionsToRetry] = React.useState<MealSuggestion[]>([]);
-    const [isEdit, setIsEdit] = React.useState<boolean>();
+    const [suggestionsToEdit, setSuggestionsToEdit] = React.useState<number[]>([]);
     const [trackedAlternateMealSelection, setTrackedAlternateMealSelection] = React.useState<AlternateMeal>();
     const [reviewableSuggestions, setReviewableSuggestions] = React.useState<ReviewableMealSuggestion[]>(storedSuggestions.map((suggestion) => {
         return {
@@ -83,7 +83,9 @@ function MealSuggestionList() {
         if (areSavedSuggestions) {
             const hasAnyUnconfirmedSuggestions = reviewableSuggestions.some(s => !s.isConfirmed);
             if (hasAnyUnconfirmedSuggestions) {
+                toast.info('Yeah must submit your feedback before you can do anything else.');
                 setIsReviewInProgress(true);
+                
             }
             else {
                 //Redirect to meal questionaire because there is nothing to do; the user has already reviewed (i.e. confirmed)
@@ -255,11 +257,26 @@ function MealSuggestionList() {
         }
 
         mealSuggestionToRate.wasMealLiked = wasMealLiked;
-        setReviewableSuggestions([...reviewableSuggestions.filter(s => s.suggestionID !== suggestionID), mealSuggestionToRate]);
+        //Doing it this way to preserve order of item displayed
+        const updatedSuggestions = reviewableSuggestions.map((suggestion) => {
+            if (!suggestion)
+                return;
+
+            if (suggestion.suggestionID === suggestionID) {
+                return mealSuggestionToRate;
+            }
+
+            return suggestion;
+        });
+        setReviewableSuggestions(updatedSuggestions.filter(s => (!!s))  as ReviewableMealSuggestion[]);
     }
 
-    const initiateSuggestionEdit = () => {
-        setIsEdit(true);
+    const initiateSuggestionEdit = (suggestionID: number) => {
+        if (suggestionsToEdit.includes(suggestionID)) {
+            return;
+        }
+
+        setSuggestionsToEdit([...suggestionsToEdit, suggestionID]);
     }
 
     const cancelAlternateMealChange = (suggestionID: number) => {
@@ -272,7 +289,8 @@ function MealSuggestionList() {
         //simply clear any tracked changes
         setTrackedAlternateMealSelection(undefined);
 
-        setIsEdit(false);
+        setSuggestionsToEdit(suggestionsToEdit.filter(id => id !== suggestionID) ?? []);
+
     }
 
     const acceptAlternateMealChange = (suggestionID: number) => {
@@ -293,9 +311,22 @@ function MealSuggestionList() {
         //Update the alternate meal
         const wasChangedBackToInitialSuggestion = trackedAlternateMealSelection.mealName === mealSuggestionToUpdate.mealName;
         mealSuggestionToUpdate.selectedAlternateMeal = wasChangedBackToInitialSuggestion ? undefined : trackedAlternateMealSelection;
-        setReviewableSuggestions([...reviewableSuggestions.filter(s => s.suggestionID !== suggestionID), mealSuggestionToUpdate]);
+        
+        //Doing it this way to preserve order of item displayed
+        const updatedSuggestions = reviewableSuggestions.map((suggestion) => {
+            if (!suggestion)
+                return;
 
-        setIsEdit(false);
+            if (suggestion.suggestionID === suggestionID) {
+                return mealSuggestionToUpdate;
+            }
+
+            return suggestion;
+        });
+
+        setReviewableSuggestions(updatedSuggestions.filter((item) => item) as ReviewableMealSuggestion[]);
+
+        setSuggestionsToEdit(suggestionsToEdit.filter(id => id !== suggestionID));
 
         //you can clear the selected meal option because we alreayd have it saved in our meal suggestion object
         setTrackedAlternateMealSelection(undefined);
@@ -305,6 +336,7 @@ function MealSuggestionList() {
         <>
             <ToastContainer position="bottom-right"
                 autoClose={5000}
+                limit={1}
                 hideProgressBar={true}
                 newestOnTop={false}
                 closeOnClick
@@ -319,7 +351,7 @@ function MealSuggestionList() {
                         !isReviewInProgress && <h5 className="uk-align-right"><FontAwesomeIcon size="xl" icon={faRepeat} /> - suggestions to try again</h5>
                     }
                     {
-                        isReviewInProgress && <h4>Please let us know how feeding the kiddos went?</h4>
+                        isReviewInProgress && <h4>How did feeding the kiddos go? Rate and Submit Feedback.</h4>
                     }
                 </div>
                 <div className="uk-card-body">
@@ -327,6 +359,7 @@ function MealSuggestionList() {
                             reviewableSuggestions.map((suggestion, index) => {
                                 const fallbackProfilePic = require('../img/default-kid-pic.png');
                                 const kid = userService.getKid(suggestion.kidId);
+                                const isEdit = suggestionsToEdit.includes(suggestion.suggestionID);
                             return <article key={index} className="uk-comment uk-comment-primary uk-margin-small-bottom" role="comment">
                                 <header className="uk-comment-header">
                                     {
@@ -342,7 +375,7 @@ function MealSuggestionList() {
                                                 </>
                                             }
                                             {
-                                                !isEdit && <a className="uk-icon-button" onClick={() => initiateSuggestionEdit()}>
+                                                !isEdit && <a className="uk-icon-button" onClick={() => initiateSuggestionEdit(suggestion.suggestionID)}>
                                                     <FontAwesomeIcon size="xl" icon={faEdit} color="black" />
                                                 </a>
                                             }

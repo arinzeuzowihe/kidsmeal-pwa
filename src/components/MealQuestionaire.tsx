@@ -19,10 +19,11 @@ function MealQuestionaire() {
     const navigate = useNavigate();
 
     const [selectedMealType, setSelectedMealType] = useState<MealType>();
-    const [includeTakeOut, setIncludeTakeOut] = useState<boolean>(true);
+    const [includeTakeOut, setIncludeTakeOut] = useState<boolean>(false);
     const [sameMealForAll, setSameMealForAll] = useState<boolean>(false);
     const [selectedKidIds, setSelectedKidIds] = useState<number[]>([]);
     const [pendingSuggestions, setPendingSuggestions] = useState<MealSuggestion[]>([]);
+    const [canProceedWithSuggestion, setCanProceedWithSuggestion] = useState<boolean>(false);
     const mobileCss = "uk-section-small uk-section-muted uk-border-rounded";
     const mainCss = mobileCss + " uk-position-center"
 
@@ -92,6 +93,9 @@ function MealQuestionaire() {
             setSameMealForAll(false);
         }
         setSelectedKidIds(selectedKidIds);
+        if (!canProceedWithSuggestion) {
+            setCanProceedWithSuggestion(true);
+        }
     }
 
     const onSameMealToggle = (value: boolean) => {
@@ -135,6 +139,7 @@ function MealQuestionaire() {
                                                         name="mealType"
                                                             onClick={() => setSelectedMealType(mealTypeEnumValue)}
                                                             checked={selectedMealType === mealTypeEnumValue}
+                                                            onChange={() => {}}
                                                         /> {MealType[mealTypeEnumValue]}
                                                 </label>
                                             </div>
@@ -154,7 +159,7 @@ function MealQuestionaire() {
                                                 type="radio"
                                                 name="takeout"
                                                 onClick={() => setIncludeTakeOut(true)}
-                                                checked={includeTakeOut}/> Yes
+                                                defaultChecked={includeTakeOut}/> Yes
                                         </label>
                                     </div>
                                     <div className="uk-margin-small-bottom">
@@ -165,7 +170,7 @@ function MealQuestionaire() {
                                                     type="radio"
                                                     name="takeout"
                                                 onClick={() => setIncludeTakeOut(false)}
-                                                checked={!includeTakeOut}/> No
+                                                defaultChecked={!includeTakeOut}/> No
                                         </label>
                                     </div>
                                 </div>
@@ -187,6 +192,7 @@ function MealQuestionaire() {
                             <button
                                 type="button"
                                 className="uk-button uk-button-primary uk-width-expand"
+                                disabled={!canProceedWithSuggestion}
                                 onClick={() => generateMealSuggestionAsync()}>SUGGEST MEAL</button>
                         </div>
                     </form>
