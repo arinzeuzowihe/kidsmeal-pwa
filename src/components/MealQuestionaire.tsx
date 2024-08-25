@@ -40,12 +40,13 @@ function MealQuestionaire() {
         
         const currentDateTime = new Date();
         const currentHour = currentDateTime.getHours();
+        console.log(currentHour);
         var defaultMealType = MealType.Snack;
         if (currentHour >= 5 && currentHour <= 11) {
             defaultMealType = MealType.Breakfast;
-        } else if (currentHour >= 12 && currentHour <= 3) {
+        } else if (currentHour >= 12 && currentHour <= 15) {
             defaultMealType = MealType.Lunch;
-        } else if (currentHour >= 5 && currentHour <= 9) {
+        } else if (currentHour >= 17 && currentHour <= 21) {
             defaultMealType = MealType.Dinner;
         }
 
