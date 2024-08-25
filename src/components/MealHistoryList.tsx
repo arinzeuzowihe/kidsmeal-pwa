@@ -6,6 +6,8 @@ import Spinner from "./Spinner";
 import UserService from "../services/user.service";
 import Dropdown from "./base/Dropdown";
 import { MealType } from "../interfaces/common.interfaces";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {faFaceFrown} from '@fortawesome/free-solid-svg-icons'
 
 interface MealHistoryListProps {
     refreshData?: boolean;
@@ -23,6 +25,7 @@ function MealHistoryList(props: MealHistoryListProps) {
     const [kidFilter, setKidFilter] = useState<string[]>([]);
     const [mealTypeFilter, setMealTypeFilter] = useState<string[]>([]);
     const [mealSearchTerm, setMealSearchTerm] = useState<string>('');
+    const [emptySearchMessage, setEmptySearchMessage] = useState<string>("Sorry no meal history has been recorded for any kids yet.");
 
     useEffect(() => {
         if (kids.length < 1)
@@ -33,6 +36,10 @@ function MealHistoryList(props: MealHistoryListProps) {
             const recentMealHistories = await mealService.getMealHistoryAsync();
             setUnfilteredMealHistoryEntries(recentMealHistories);
             setFilteredMealHistoryEntries(recentMealHistories);
+
+            if (recentMealHistories.length > 0) {
+                setEmptySearchMessage("No meal history was found that matches that search criteria.");
+            }
         };
 
         fetchMealHistory()
@@ -141,10 +148,9 @@ function MealHistoryList(props: MealHistoryListProps) {
                 {
                     (!filteredMealHistoryEntries || filteredMealHistoryEntries.length <= 0) &&
                     <div className="uk-card  uk-card-default uk-card-body uk-text-center">
-                        <div className="uk-margin-bottom-remove"><span className="uk-icon" uk-icon="icon: plus-circle; ratio: 2"></span></div>
+                        <div className="uk-margin-bottom-remove"><FontAwesomeIcon size="4x" icon={faFaceFrown}/></div>
                         <h2 className="uk-margin-small">No Meal History</h2>
-                        <div>Sorry no meal history has been recorded for any kiddos yet.</div>
-                            
+                            <div>{emptySearchMessage}</div>        
                     </div>
                 }
             </div>

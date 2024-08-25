@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";                                                                                          
-import { BasicMealPreference, MealSuggestion } from "../interfaces/api/responses";
+import { BasicMealPreference, MealSuggestion, ResponseErrorCodes } from "../interfaces/api/responses";
 import {faCancel, faCheck, faEdit, faFrown, faRepeat, faSmile} from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { MealType } from "../interfaces/common.interfaces";
@@ -185,7 +185,12 @@ function MealSuggestionList() {
         }
 
         const response = await mealService.getMealSuggestionAsync(kidIds, generationParams.mealType, generationParams.includeTakeout, generationParams.sameMealForAll);
-        const updatedSuggestions = [...reviewableSuggestions.filter(s => !kidIds.includes(s.kidId)), ...response];  //Update local copy of suggestions in state
+        if (response.errorCode === ResponseErrorCodes.MEAL_HIST_EXIST)
+        {
+            toast.info(`One or more kids already ate ${ MealType[generationParams.mealType]} today. Update kid or meal type selection.`)
+            return;
+        }
+        const updatedSuggestions = [...reviewableSuggestions.filter(s => !kidIds.includes(s.kidId)), ...response.suggestions];  //Update local copy of suggestions in state
         dispatch(storeGeneratedSuggestions({suggestions: updatedSuggestions}));
     }
 

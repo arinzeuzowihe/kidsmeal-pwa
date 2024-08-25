@@ -1,5 +1,5 @@
 import { BaseMealPreferenceRequest, MealHistoryRequest, UpsertMealPreferenceRequest, MealSuggestionRequest, SaveMealSuggestionRequest, MealSuggestionReview, ReviewMealSuggestionsRequest } from "../interfaces/api/requests";
-import { BaseKid, BaseMeal, BasicMealPreference, DetailedMealPreference, MealHistory, MealSuggestion } from "../interfaces/api/responses";
+import { BaseKid, BaseMeal, BasicMealPreference, DetailedMealPreference, MealHistory, MealSuggestion, ResponseErrorCodes } from "../interfaces/api/responses";
 import { MealType } from "../interfaces/common.interfaces";
 import BaseService from "./base.service";
 
@@ -46,7 +46,7 @@ class MealService extends BaseService {
         return response.pendingSuggestions as MealSuggestion[];
     }
 
-    public async getMealSuggestionAsync(kidIds: number[], mealType: MealType, includeTakeOut: boolean, sameMealForAll: boolean): Promise<MealSuggestion[]> {
+    public async getMealSuggestionAsync(kidIds: number[], mealType: MealType, includeTakeOut: boolean, sameMealForAll: boolean): Promise<{ suggestions: MealSuggestion[], errorCode?: ResponseErrorCodes}> {
         const request: MealSuggestionRequest = {
             kidIds,
             mealType,
@@ -54,7 +54,11 @@ class MealService extends BaseService {
             sameMealForAll
         }
         const response = await this.postAsync('/meal/suggestion/generate', request);
-        return response?.pendingSuggestions;
+        return {
+            suggestions: response?.pendingSuggestions,
+            errorCode: response?.errorCode
+        }
+            
     }
 
     public async saveMealSuggestionsAsync(suggestedMeals: MealSuggestion[]):Promise<MealSuggestion[]> {

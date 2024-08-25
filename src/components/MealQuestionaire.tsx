@@ -6,7 +6,7 @@ import { MealSuggestionParams, MealType } from "../interfaces/common.interfaces"
 import { useAppDispatch } from "../hooks/reduxHooks";
 import { storeGeneratedSuggestions } from "../redux/slices/mealSuggestionSlice";
 import { useNavigate } from "react-router-dom";
-import { MealSuggestion } from "../interfaces/api/responses";
+import { MealSuggestion, ResponseErrorCodes } from "../interfaces/api/responses";
 import { ToastContainer, toast } from "react-toastify";
 import Switch from "react-switch";
 import { useMediaQuery } from 'react-responsive';
@@ -72,8 +72,11 @@ function MealQuestionaire() {
         }
 
         const response = await mealService.getMealSuggestionAsync(selectedKidIds, selectedMealType, includeTakeOut, sameMealForAll);
-
-        if (!response || response.length == 0) {
+        if (response.errorCode === ResponseErrorCodes.MEAL_HIST_EXIST) {
+            toast.info(`One or more kids already ate ${MealType[selectedMealType]} today. Update kid or meal type selection.`);
+            return;
+        }
+        if (!response.suggestions || response.suggestions.length == 0) {
             toast.info('Unable to find any suggestions. Try changing your criteria.');
             return;
         }
@@ -84,7 +87,7 @@ function MealQuestionaire() {
             includeTakeout: includeTakeOut,
             sameMealForAll
         }
-        dispatch(storeGeneratedSuggestions({ params, suggestions: response }))
+        dispatch(storeGeneratedSuggestions({ params, suggestions: response.suggestions }))
         navigate('/suggestions');
     }
 

@@ -51,6 +51,10 @@ export interface DetailedMealPreference {
     isTakeout: boolean;
 }
 
+export enum ResponseErrorCodes {
+    MEAL_HIST_EXIST
+}
+
 // TODO: Replace Kid type with BaseKid contract
 type Kid = {
     kidID: number,
