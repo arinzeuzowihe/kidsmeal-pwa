@@ -48,7 +48,7 @@ function App(props) {
         </>
       }      
       {
-        !isUserLoggedIn && <LoginForm onLoginCompleted={() => setisUserLoggedIn(true)} />
+        !isUserLoggedIn && <LoginForm onLoginCompleted={(successfulLogin) => setisUserLoggedIn(successfulLogin)} />
       }
     </div>
   );

@@ -25,7 +25,7 @@ function LoginForm({ onLoginCompleted }) {
         if (!response.wasSuccessful) {
             setLoginError(response.errorMessage);
         }
-        onLoginCompleted(response.wasSuccessful, userInfo);
+        onLoginCompleted(response.wasSuccessful);
 
         setIsLoading(false);
     };
