@@ -76,7 +76,8 @@ class MealService extends BaseService {
     }
 
     public async getCommonMealPreferencesAsync(kidIds: number[], activeOnly: boolean): Promise<BasicMealPreference[]>  {
-        return await this.postAsync(`/meal/preferences/${activeOnly}`, kidIds);
+        var mealPreferences: BasicMealPreference[] = await this.postAsync(`/meal/preferences/${activeOnly}`, kidIds);
+        return mealPreferences.sort((a, b) => a.mealName.localeCompare(b.mealName));
     }
 
     public async getPreferredMealDetails(mealId: number, kidIds: number[]): Promise<DetailedMealPreference> {
